@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
-    <title>University Hostel Management System</title>
+    <title>ROOMMATE | University Hostel Management System</title>
     <link rel="stylesheet" href="css/global.css" />
     <link rel="stylesheet" href="css/components.css" />
     <link rel="favicon" href="" />
@@ -11,38 +11,125 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </head>
 <body>
-    <!-- Main navigation header -->
-    <header class="main-header">
-        <nav class="nav-container">
-            <div class="logo">
-                <div class="main-logo">HostelPortal</div> <!-- All naming attempts are currently placeholders -->
-            </div>
-            <div class="nav-links">
-                <a href="#features">Features</a>
-                <a href="#about">About</a>
-                <a href="pages/auth/login.html" class="btn btn-secondary">Login</a>
-            </div>
-        </nav>
-    </header>
+    <!-- Top Navigation Placeholder -->
+    <div id="navbar-placeholder">
+        <header class="main-header">
+            <nav class="nav-container" aria-label="Main navigation">
+                <div class="logo">
+                    <a href="index.html" class="main-logo">ROOMMATE</a>
+                </div>
+                <button class="nav-menu-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" onclick="toggleMobileNav()">
+                    <i data-lucide="menu" aria-hidden="true"></i>
+                </button>
+                <div class="nav-links" id="main-navigation">
+                    <a href="index.html#features">Features</a>
+                    <a href="index.html#about">About</a>
+                    <button class="btn-icon theme-toggle" onclick="toggleDarkMode()" title="Switch to dark mode" aria-label="Switch to dark mode" type="button">
+                        <i data-lucide="sun" class="sun-icon"></i>
+                        <i data-lucide="moon" class="moon-icon"></i>
+                    </button>
+                    <a href="pages/auth/login.html" class="btn btn-secondary">Login</a>
+                </div>
+            </nav>
+        </header>
+    </div>
 
-    <main>
-        <!-- Hero Section, introductory -->
+    <main class="bg-gradient">
+        <!-- Hero Section -->
         <section class="hero-section">
-            <div class="hero-content">
-                <h1>Streamlined university hostel allocation</h1>
-                <p>It's easier. Way easier.</p>
-                <div class="cta-actions">
-                    <a href="pages/auth/login.html" class="btn btn-primary">Get started</a>
+            <div class="container">
+                <div class="hero-wrapper">
+                    <div class="hero-content">
+                        <p class="section-label">University of Ibadan</p>
+                        <h1 class="text-balance">Find your place on campus.</h1>
+                        <p class="text-lg text-muted-foreground mb-8">
+                            Your home for the year starts here. Complete one application to be considered for every residence that fits your preferences.
+                        </p>
+                        <div class="cta-actions">
+                            <a href="pages/auth/login.html" class="btn btn-primary">Get Started</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Process Section -->
+        <section class="border-t border-border bg-background">
+            <div class="container py-24">
+                <div class="section-header">
+                    <p class="section-label">How it works</p>
+                    <h2 class="text-balance">Three steps to your new room</h2>
+                </div>
+                <div class="step-grid">
+                    <div class="step-card">
+                        <span class="step-number">01</span>
+                        <h3>Explore</h3>
+                        <p class="text-sm text-muted-foreground">Browse through our curated list of campus residences, filter by distance, price, and amenities.</p>
+                    </div>
+                    <div class="step-card">
+                        <span class="step-number">02</span>
+                        <h3>Apply</h3>
+                        <p class="text-sm text-muted-foreground">Fill out a single application form. We'll handle the matching based on your specific preferences.</p>
+                    </div>
+                    <div class="step-card">
+                        <span class="step-number">03</span>
+                        <h3>Move In</h3>
+                        <p class="text-sm text-muted-foreground">Once allocated, sign your agreement digitally and get ready for the upcoming semester.</p>
+                    </div>
                 </div>
             </div>
         </section>
     </main>
 
+    <!-- Features Section -->
+    <section id="features" class="features-section">
+        <div class="container">
+            <div class="section-header">
+                <p class="section-label">Features</p>
+                <h2>Everything you need to find a home</h2>
+            </div>
+            <div class="features-grid">
+                <div class="card">
+                    <div class="card-icon">🏠</div>
+                    <h3>Smart Selection</h3>
+                    <p>Browse residences based on distance to campus, budget, and room type.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">⚡</div>
+                    <h3>Quick Application</h3>
+                    <p>Complete one application for all university residences in minutes.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">❤️</div>
+                    <h3>Shortlist</h3>
+                    <p>Save your favorite rooms and compare them side-by-side.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
-    <footer class="main-footer">
-        <p>&copy; 2026 University Hostel Management System. All rights reserved.</p>
-        <a href="credits.html">Meet the team!</a>
-    </footer>
+    <div id="footer-placeholder"></div>
+
+    <!-- Modal Placeholder -->
+    <div id="modal-placeholder"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/app.js"></script>
+    <script>
+        // Components load automatically on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load shared components
+            loadComponent('navbar', 'navbar-placeholder');
+            loadComponent('footer', 'footer-placeholder');
+            loadComponent('modal', 'modal-placeholder');
+
+            // Initialize icons for the static content
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+        });
+    </script>
 </body>
 <script href="js/config.js"></script>
 <script href="js/api.js"></script>

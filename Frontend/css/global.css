@@ -1,25 +1,26 @@
 /* Global CSS Variables - Extracted from Design Scheme */
 :root {
   --background: 0 0% 100%;
-  --foreground: 240 10% 3.9%;
+  --foreground: 222.2 84% 4.9%; /* Deep slate instead of harsh black */
 
   --card: 0 0% 100%;
-  --card-foreground: 240 10% 3.9%;
+  --card-foreground: 222.2 84% 4.9%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 240 10% 3.9%;
+  --popover-foreground: 222.2 84% 4.9%;
 
-  --primary: 240 5.9% 10%;
-  --primary-foreground: 0 0% 98%;
+  --primary: 221 83% 53%;
+  --primary: 221 83% 53%; /* Brand Blue for Light Mode */
+  --primary-foreground: 210 40% 98%;
 
-  --secondary: 240 4.8% 95.9%;
-  --secondary-foreground: 240 5.9% 10%;
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
 
-  --muted: 240 4.8% 95.9%;
-  --muted-foreground: 240 3.8% 46.1%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
 
-  --accent: 240 4.8% 95.9%;
-  --accent-foreground: 240 5.9% 10%;
+  --accent: 210 40% 96.1%; /* Default accent same as secondary in light */
+  --accent-foreground: 222.2 47.4% 11.2%;
 
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 0 0% 98%;
@@ -41,6 +42,7 @@
   --leading-normal: 1.5;
   --leading-relaxed: 2rem;
 
+  --font-size-xxs: 0.625rem;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
@@ -67,8 +69,8 @@
   --popover: 240 10% 3.9%;
   --popover-foreground: 0 0% 98%;
 
-  --primary: 0 0% 98%;
-  --primary-foreground: 240 5.9% 10%;
+  --primary: 45 92% 47%; /* Brand Gold for Dark Mode */
+  --primary-foreground: 240 10% 3.9%;
 
   --secondary: 240 3.7% 15.9%;
   --secondary-foreground: 0 0% 98%;
@@ -76,7 +78,9 @@
   --muted: 240 3.7% 15.9%;
   --muted-foreground: 240 5% 64.9%;
 
-  --accent: 240 3.7% 15.9%;
+  --accent: 45 92% 47%;
+  --accent-foreground: 240 10% 3.9%;
+  --accent: 45 92% 47%; /* Keep the gold accent */
   --accent-foreground: 0 0% 98%;
 
   --destructive: 0 62.8% 30.6%;
@@ -93,18 +97,56 @@
   --chart-5: 340 75% 55%;
 }
 
-* {
+/* CSS Reset & Base Styles */
+*, ::before, ::after {
+  box-sizing: border-box;
+  border-width: 0;
+  border-style: solid;
   border-color: hsl(var(--border));
 }
 
+html, body {
+  min-height: 100%;
+  margin: 0;
+}
+
+html {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -moz-tab-size: 4;
+  tab-size: 4;
+  font-family: var(--font-sans);
+}
+
 body {
+  margin: 0;
+  line-height: var(--leading-normal);
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
-  font-family: var(--font-sans);
-  font-feature-settings: "rlig" 1, "calt" 1;
-  line-height: var(--leading-normal);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Remove default styling for inputs */
+button, input, optgroup, select, textarea {
+  font-family: inherit;
+  font-size: 100%;
+  line-height: inherit;
+  color: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  text-transform: none;
+  background-color: transparent;
+  background-image: none;
+  cursor: pointer;
+}
+
+input {
+  appearance: none;
+  background-color: transparent;
 }
 
 h1 {
