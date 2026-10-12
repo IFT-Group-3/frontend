@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <title>Dashboard | ROOMMATE</title>
+    <script>
+        (function () {
+            try {
+                var savedTheme = localStorage.getItem('theme-preference');
+                var preferredTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-appearance', preferredTheme);
+            } catch (error) {}
+        }());
+    </script>
+    <link rel="stylesheet" href="../../css/global.css" />
+    <link rel="stylesheet" href="../../css/components.css" />
+    <link rel="stylesheet" href="../../css/student.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<body class="dashboard-layout">
+    <!-- Sidebar Placeholder -->
+    <div id="sidebar-placeholder"></div>
+
+    <div class="main-content">
+        <!-- Top Navigation Placeholder -->
+        <div id="navbar-placeholder">
+            <header class="main-header">
+                <nav class="nav-container" aria-label="Main navigation">
+                    <a href="../../index.html" class="main-logo">ROOMMATE</a>
+                    <button class="nav-menu-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" onclick="toggleMobileNav()"><i data-lucide="menu" aria-hidden="true"></i></button>
+                    <div class="nav-links" id="main-navigation">
+                        <a href="../../index.html#features">Features</a>
+                        <a href="../../index.html#about">About</a>
+                        <button class="btn-icon theme-toggle" type="button" onclick="toggleDarkMode()" aria-label="Switch to dark mode"><i data-lucide="sun" class="sun-icon"></i><i data-lucide="moon" class="moon-icon"></i></button>
+                        <a href="../auth/login.html" class="btn btn-secondary">Login</a>
+                    </div>
+                </nav>
+            </header>
+        </div>
+
+        <main class="content-padding">
+            <header class="page-header">
+                <div>
+                    <p class="text-sm text-muted-foreground tracking-wide">AUTUMN 2025 INTAKE</p>
+                    <h1>Find your place on campus.</h1>
+                </div>
+                <button class="btn btn-primary">
+                    Continue Application
+                </button>
+            </header>
+
+            <!-- Dashboard Grid -->
+            <div class="dashboard-grid">
+                <!--
+                REFERENCE: Hero Card Mockup Design
+                <div class="hero-card-mockup">
+                    <div class="flex gap-6 items-center">
+                        <div class="item-thumb primary" style="width: 120px; height: 120px; flex-shrink: 0;"></div>
+                        <div class="hero-card-info">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-semibold text-xl">Mellanby Hall</h4>
+                                <span class="badge badge-accent">Recommended</span>
+                            </div>
+                            <p class="text-sm text-muted-foreground">Standard Room · 5 min walk to Faculty of Arts</p>
+                            <div class="flex justify-between items-center mt-6">
+                                <span class="font-bold text-2xl">₦45,000<span class="text-sm font-normal text-muted-foreground">/session</span></span>
+                                <div class="flex gap-2 items-center">
+                                    <div class="status-icon success" style="width:24px; height:24px;"><i data-lucide="check" style="width:14px;"></i></div>
+                                    <span class="text-sm font-medium">Available</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                -->
+                <!-- Application Status Card -->
+                <section class="card">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h3>Your application</h3>
+                            <p>4 of 6 sections complete</p>
+                        </div>
+                        <span class="badge badge-secondary">IN PROGRESS</span>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="progress-container mb-6">
+                        <div class="progress-bar" style="width: 68%;"></div>
+                    </div>
+
+                    <div class="status-list">
+                        <div class="status-item">
+                            <span class="status-icon success"><i data-lucide="check"></i></span>
+                            <span class="label">Personal details</span>
+                            <span class="value">Complete</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-icon success"><i data-lucide="check"></i></span>
+                            <span class="label">Course & budget</span>
+                            <span class="value">Complete</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-icon active"></span>
+                            <span class="label">Room preferences</span>
+                            <span class="value text-primary">In progress</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-icon"></span>
+                            <span class="label">Supporting documents</span>
+                            <span class="value">Not started</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Shortlist Card -->
+                <aside class="card bg-muted/30">
+                    <h3>Your shortlist</h3>
+                    <p class="mb-6">Save residences as you browse.</p>
+
+                    <div class="shortlist-items">
+                        <div class="shortlist-item">
+                            <div class="item-thumb primary"></div>
+                            <div class="item-info">
+                                <h4>Maple Hall</h4>
+                                <p>En-suite · 8 min walk</p>
+                                <span class="price">From £168/wk</span>
+                            </div>
+                            <button class="btn-icon"><i data-lucide="heart"></i></button>
+                        </div>
+                        <div class="shortlist-item">
+                            <div class="item-thumb secondary"></div>
+                            <div class="item-info">
+                                <h4>The Foundry</h4>
+                                <p>Studio · 12 min walk</p>
+                                <span class="price">From £192/wk</span>
+                            </div>
+                            <button class="btn-icon"><i data-lucide="heart"></i></button>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+
+            <!-- Simple Footer for Dashboard -->
+        </main>
+        <div id="footer-placeholder"></div>
+    </div>
+
+    <!-- Modal Placeholder -->
+    <div id="modal-placeholder"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../../js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load shared components
+            loadComponent('sidebar', 'sidebar-placeholder');
+            loadComponent('navbar', 'navbar-placeholder');
+            loadComponent('footer', 'footer-placeholder');
+            loadComponent('modal', 'modal-placeholder');
+        });
+    </script>
+</body>
+</html>
