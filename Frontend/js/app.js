@@ -114,6 +114,22 @@ function isUniversityEmail(value) {
     return /^[^\s@]+@stu\.ui\.edu\.ng$/i.test(value.trim());
 }
 
+function isStaffEmail(value) {
+    return /^[^\s@]+@ui\.edu\.ng$/i.test(value.trim()) && !/@stu\.ui\.edu\.ng$/i.test(value.trim());
+}
+
+function validateStaffEmail(input, messageElement) {
+    const valid = isStaffEmail(input.value);
+    input.classList.toggle('is-invalid', !valid);
+    input.classList.toggle('is-valid', valid);
+    input.setCustomValidity(valid ? '' : 'Use an authorized university staff email ending in @ui.edu.ng.');
+    if (messageElement) {
+        messageElement.textContent = valid ? '' : 'Use an authorized university staff email ending in @ui.edu.ng.';
+        messageElement.hidden = valid;
+    }
+    return valid;
+}
+
 function validateUniversityEmail(input, messageElement) {
     const valid = isUniversityEmail(input.value);
     input.classList.toggle('is-invalid', !valid);
@@ -237,4 +253,6 @@ window.toggleMobileNav = toggleMobileNav;
 window.showToast = showToast;
 window.setBtnLoading = setBtnLoading;
 window.isUniversityEmail = isUniversityEmail;
+window.isStaffEmail = isStaffEmail;
+window.validateStaffEmail = validateStaffEmail;
 window.validateUniversityEmail = validateUniversityEmail;

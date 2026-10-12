@@ -49,6 +49,19 @@ File: `Frontend/pages/auth/reset-password.html`
 
 Client-side validation improves the user experience but is not a security boundary. The backend must independently validate the email domain, password requirements, authentication credentials, reset token, and request state when the API is connected.
 
+### Administrator sign in
+
+Files: `Frontend/pages/auth/admin-login.html`, `Frontend/pages/admin/dashboard.html`
+
+1. Administrators use a separate sign-in page and are not routed through the student login form.
+2. The prototype accepts a university staff-style address ending in `@ui.edu.ng`, excluding student addresses ending in `@stu.ui.edu.ng`.
+3. The password has show/hide support and the submit button displays a loading state.
+4. A successful prototype submission redirects to the administration dashboard.
+5. The dashboard uses an administration-specific sidebar for students, hostels, rooms, allocations, and payments.
+6. Current dashboard figures are display-only prototype content pending API integration.
+
+The frontend domain check is only a usability guard. The backend must authenticate the account, verify an administrator role and permissions, establish a secure session, and reject students attempting to access administration routes. Administrative authentication should also support rate limiting, audit logging, secure password storage, and MFA where required.
+
 ## Shared Components
 
 Shared component files are stored in `Frontend/components/`:
@@ -57,6 +70,7 @@ Shared component files are stored in `Frontend/components/`:
 |---|---|---|
 | Navbar | `navbar.html` | Shared branding, navigation links, theme toggle, login link, and mobile menu |
 | Sidebar | `sidebar.html` | Student dashboard navigation |
+| Admin sidebar | `admin-sidebar.html` | Administration dashboard navigation |
 | Footer | `footer.html` | Shared landing-page, dashboard, and recovery-page footer |
 | Modal | `modal.html` | Generic accessible modal structure |
 | Loader | `loader.html` | Loading indicator markup |
@@ -79,6 +93,8 @@ When a component cannot be fetched, the application keeps server-rendered markup
 - The navbar supports light and dark appearance modes.
 - The selected theme is stored in `localStorage` under `theme-preference`.
 - The theme control updates its tooltip and accessible label after switching modes.
+- Theme-related colors transition over 250ms for a smoother mode change without animating layout.
+- The saved or system-preferred theme is applied before stylesheets render to prevent a light/dark flash on page load.
 - At viewport widths of 700px or less, navigation links collapse behind a menu button.
 - The mobile menu exposes `aria-expanded` and changes its accessible label when opened or closed.
 - The dashboard and landing page use the same navbar component and fallback behavior.
@@ -109,6 +125,10 @@ When a component cannot be fetched, the application keeps server-rendered markup
 - Added password visibility controls and password strength feedback.
 - Added loading states and success/error toast feedback to authentication forms.
 - Removed the footer from the sign-in page as required; recovery and reset pages retain the shared footer.
+- Added a separate administrator sign-in flow and administration dashboard shell.
+- Added an administration sidebar component with links for operational management areas.
+- Added an administrator sign-in call-to-action below the landing-page features section.
+- Applied the saved or system theme before stylesheets render to prevent light/dark mode flash on page load.
 
 ## Relevant Files
 
@@ -118,3 +138,5 @@ When a component cannot be fetched, the application keeps server-rendered markup
 - `Frontend/css/auth.css` — authentication layout and validation warning styles.
 - `Frontend/pages/auth/` — sign-in, forgot-password, and reset-password flows.
 - `Frontend/pages/student/dashboard.html` — student dashboard using shared navigation and footer.
+- `Frontend/pages/auth/admin-login.html` — separate administrator sign-in interface.
+- `Frontend/pages/admin/dashboard.html` — administration dashboard shell.

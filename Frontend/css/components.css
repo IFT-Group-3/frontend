@@ -374,6 +374,28 @@ a:not(.btn):not(.main-logo):not(.nav-item):hover {
     padding-left: 0.5rem;
 }
 
+.sidebar-role {
+    display: block;
+    margin-top: 0.5rem;
+    color: hsl(var(--muted-foreground));
+    font-size: var(--font-size-xxs);
+    font-weight: 700;
+    letter-spacing: var(--tracking-wide);
+}
+
+.admin-stat {
+    margin: 0.75rem 0 0.25rem;
+    font-size: 2rem;
+}
+
+.admin-notice-card {
+    margin-top: 2rem;
+}
+
+.admin-notice-card > .flex {
+    margin-bottom: 1.5rem;
+}
+
 .sidebar-nav {
     display: flex;
     flex-direction: column;
@@ -870,6 +892,45 @@ a:not(.btn):not(.main-logo):not(.nav-item):hover {
 .bg-gradient {
     background: radial-gradient(circle at top right, hsl(var(--primary) / 0.03), transparent);
 }
+
+.admin-access-section {
+    padding: 4rem 0;
+    background-color: hsl(var(--background));
+    border-top: 1px solid hsl(var(--border));
+}
+
+.admin-access-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    padding: 2rem;
+    background-color: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+}
+
+.admin-access-card h2 {
+    margin: 0 0 0.75rem;
+}
+
+.admin-access-card p:not(.section-label) {
+    max-width: 42rem;
+    margin: 0;
+    color: hsl(var(--muted-foreground));
+}
+
+@media (max-width: 700px) {
+    .admin-access-card {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .admin-access-card .btn {
+        width: 100%;
+    }
+}
+
 /* Footer */
 .main-footer {
     background-color: hsl(var(--secondary));
@@ -946,4 +1007,21 @@ a:not(.btn):not(.main-logo):not(.nav-item):hover {
     color: hsl(var(--primary));
     text-decoration: underline;
     text-underline-offset: 4px;
+}
+
+/* Animate theme colors without affecting layout or interaction transitions. */
+body,
+.main-header,
+.auth-content,
+.sidebar,
+.card,
+.modal-content,
+.toast,
+.main-footer,
+.admin-access-card,
+.input,
+.select,
+.btn-secondary,
+.nav-menu-toggle {
+    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }

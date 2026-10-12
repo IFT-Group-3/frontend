@@ -2,6 +2,15 @@
 <html lang="en-GB">
 <head>
     <title>ROOMMATE | University Hostel Management System</title>
+    <script>
+        (function () {
+            try {
+                var savedTheme = localStorage.getItem('theme-preference');
+                var preferredTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-appearance', preferredTheme);
+            } catch (error) {}
+        }());
+    </script>
     <link rel="stylesheet" href="css/global.css" />
     <link rel="stylesheet" href="css/components.css" />
     <link rel="favicon" href="" />
@@ -104,6 +113,19 @@
                     <h3>Shortlist</h3>
                     <p>Save your favorite rooms and compare them side-by-side.</p>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="admin-access-section" aria-labelledby="admin-access-title">
+        <div class="container">
+            <div class="admin-access-card">
+                <div>
+                    <p class="section-label">Staff access</p>
+                    <h2 id="admin-access-title">Managing university residences?</h2>
+                    <p>Access the secure administration portal to review applications, manage rooms, and oversee allocations.</p>
+                </div>
+                <a href="pages/auth/admin-login.html" class="btn btn-secondary">Administrator sign in</a>
             </div>
         </div>
     </section>

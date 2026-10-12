@@ -112,6 +112,16 @@
     margin-bottom: 2.5rem;
 }
 
+.auth-eyebrow {
+    display: inline-block;
+    margin-bottom: 0.75rem;
+    color: hsl(var(--primary));
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+}
+
 .auth-header h1 {
     font-size: 1.875rem;
     font-weight: 700;
