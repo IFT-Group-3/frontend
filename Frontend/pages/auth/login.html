@@ -43,7 +43,7 @@
             <form class="auth-form" action="../student/dashboard.html" onsubmit="handleLogin(event, this)" novalidate>
                 <div class="form-group">
                     <label class="label" for="email">University Email</label>
-                    <input type="email" id="email" class="input" placeholder="name@stu.ui.edu.ng" pattern="^[^@\s]+@stu\.ui\.edu\.ng$" title="Use your university email ending in @stu.ui.edu.ng" autocomplete="email" required oninput="validateUniversityEmail(this, document.getElementById('email-error'))" />
+                    <input type="email" id="email" class="input" placeholder="name@ui.edu.ng" autocomplete="email" required />
                     <p id="email-error" class="field-warning" role="alert" hidden></p>
                 </div>
 
@@ -111,10 +111,6 @@
             event.preventDefault();
             const error = document.getElementById('login-error');
             error.hidden = true;
-            if (!validateUniversityEmail(document.getElementById('email'), document.getElementById('email-error'))) {
-                document.getElementById('email').focus();
-                return;
-            }
             if (!form.checkValidity()) {
                 form.reportValidity();
                 return;
@@ -122,8 +118,9 @@
             setBtnLoading(form.querySelector('button[type="submit"]'), true);
             try {
                 const user = await signIn(document.getElementById('email').value, document.getElementById('password').value);
-                if (user.role !== 'student') throw new Error('This account belongs to an administrator. Use administrator sign in.');
-                window.location.href = form.action;
+                window.location.href = user.role === 'admin'
+                    ? '../admin/dashboard.html'
+                    : '../student/dashboard.html';
             } catch (requestError) {
                 error.textContent = requestError.message;
                 error.hidden = false;

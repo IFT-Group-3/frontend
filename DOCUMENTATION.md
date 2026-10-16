@@ -15,12 +15,12 @@ ROOMMATE is a university hostel allocation frontend for the University of Ibadan
 
 File: `Frontend/pages/auth/login.html`
 
-1. The student enters a university email and password.
-2. The email must end in `@stu.ui.edu.ng`.
+1. The user enters an email and password.
+2. The form submits to the shared authentication endpoint; the page does not assign a role based on email domain.
 3. The password can be shown or hidden with the password toggle.
 4. Invalid university email addresses display an inline warning and red input styling.
 5. Valid submissions display a loading state on the **Sign in** button.
-6. The current prototype redirects to `Frontend/pages/student/dashboard.html`.
+6. The API response determines the destination: `student` goes to `Frontend/pages/student/dashboard.html`, while `admin` goes to `Frontend/pages/admin/dashboard.html`.
 7. The page includes links for forgotten passwords, admissions support, and License & Legal.
 
 ### Forgot password
@@ -53,21 +53,30 @@ Client-side validation improves the user experience but is not a security bounda
 
 Files: `Frontend/pages/auth/admin-login.html`, `Frontend/pages/admin/dashboard.html`
 
-1. Administrators use a separate sign-in page and are not routed through the student login form.
-2. 3. The password has show/hide support and the submit button displays a loading state.
+1. Administrators have a separate sign-in page for clear UI context, but it uses the same login endpoint as student sign-in.
+2. The page submits the entered email and password without assigning or inferring a role.
+3. The password has show/hide support and the submit button displays a loading state.
 4. The form calls `POST https://hostel-system.iceiy.com/api/auth/login` with the documented `{ email, password }` payload.
-5. The returned `user.role` must be `admin`; student accounts are rejected on this page.
-6. A successful response redirects to the administration dashboard.
-7. The dashboard uses an administration-specific sidebar for students, hostels, rooms, allocations, and payments.
-8. Current dashboard figures are display-only prototype content.
+5. The database-backed `user.role` determines routing: `admin` goes to the administration dashboard and `student` goes to the student dashboard.
+6. The dashboard uses an administration-specific sidebar for students, hostels, rooms, allocations, and payments.
+7. Current dashboard figures are display-only prototype content.
 
 ### API-backed sign in
 
-Both sign-in pages use the documented login endpoint and send `credentials: 'include'` so the PHP `PHPSESSID` session cookie can be retained. The student page requires a returned `student` role, while the administrator page requires an `admin` role. Network failures, invalid JSON, unsuccessful responses, and missing roles are shown as inline form errors.
+Both sign-in pages use the documented login endpoint and send `credentials: 'include'` so the PHP `PHPSESSID` session cookie can be retained. The API response is the only source of the account role. Network failures, invalid JSON, unsuccessful responses, and missing roles are shown as inline form errors.
 
 The API specification currently defines no password-recovery or password-reset endpoints. Those pages remain UI-only and are not sent to the backend.
 
-The frontend domain check is only a usability guard. The backend must authenticate the account, verify an administrator role and permissions, establish a secure session, and reject students attempting to access administration routes. Administrative authentication should also support rate limiting, audit logging, secure password storage, and MFA where required.
+The backend authenticates the account and determines its role from the database. It must establish a secure session and enforce permissions on protected routes. Administrative authentication should also support rate limiting, audit logging, secure password storage, and MFA where required.
+
+### Administrator registration
+
+The API provides two distinct administrator registration operations:
+
+1. `POST /api/auth/bootstrap-admin` is a one-time, localhost-only setup operation used to create the first administrator from the terminal. It is not a public frontend registration flow and should be disabled or removed after initial setup.
+2. `POST /api/auth/admin/register` is for an already authenticated administrator to create another administrator account. The backend enforces the existing administrator session and must reject unauthenticated or student requests.
+
+The frontend does not expose either endpoint as a public registration form. Administrator creation remains controlled by the backend and an authenticated administrator session.
 
 ## Shared Components
 
