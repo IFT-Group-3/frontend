@@ -104,6 +104,10 @@
         }
 
         function handleLogin(event, form) {
+            handleStudentLogin(event, form);
+        }
+
+        async function handleStudentLogin(event, form) {
             event.preventDefault();
             const error = document.getElementById('login-error');
             error.hidden = true;
@@ -116,7 +120,15 @@
                 return;
             }
             setBtnLoading(form.querySelector('button[type="submit"]'), true);
-            setTimeout(() => { window.location.href = form.action; }, 700);
+            try {
+                const user = await signIn(document.getElementById('email').value, document.getElementById('password').value);
+                if (user.role !== 'student') throw new Error('This account belongs to an administrator. Use administrator sign in.');
+                window.location.href = form.action;
+            } catch (requestError) {
+                error.textContent = requestError.message;
+                error.hidden = false;
+                setBtnLoading(form.querySelector('button[type="submit"]'), false);
+            }
         }
     </script>
 </body>

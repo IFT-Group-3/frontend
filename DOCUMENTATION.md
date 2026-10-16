@@ -54,11 +54,18 @@ Client-side validation improves the user experience but is not a security bounda
 Files: `Frontend/pages/auth/admin-login.html`, `Frontend/pages/admin/dashboard.html`
 
 1. Administrators use a separate sign-in page and are not routed through the student login form.
-2. The prototype accepts a university staff-style address ending in `@ui.edu.ng`, excluding student addresses ending in `@stu.ui.edu.ng`.
-3. The password has show/hide support and the submit button displays a loading state.
-4. A successful prototype submission redirects to the administration dashboard.
-5. The dashboard uses an administration-specific sidebar for students, hostels, rooms, allocations, and payments.
-6. Current dashboard figures are display-only prototype content pending API integration.
+2. 3. The password has show/hide support and the submit button displays a loading state.
+4. The form calls `POST https://hostel-system.iceiy.com/api/auth/login` with the documented `{ email, password }` payload.
+5. The returned `user.role` must be `admin`; student accounts are rejected on this page.
+6. A successful response redirects to the administration dashboard.
+7. The dashboard uses an administration-specific sidebar for students, hostels, rooms, allocations, and payments.
+8. Current dashboard figures are display-only prototype content.
+
+### API-backed sign in
+
+Both sign-in pages use the documented login endpoint and send `credentials: 'include'` so the PHP `PHPSESSID` session cookie can be retained. The student page requires a returned `student` role, while the administrator page requires an `admin` role. Network failures, invalid JSON, unsuccessful responses, and missing roles are shown as inline form errors.
+
+The API specification currently defines no password-recovery or password-reset endpoints. Those pages remain UI-only and are not sent to the backend.
 
 The frontend domain check is only a usability guard. The backend must authenticate the account, verify an administrator role and permissions, establish a secure session, and reject students attempting to access administration routes. Administrative authentication should also support rate limiting, audit logging, secure password storage, and MFA where required.
 
