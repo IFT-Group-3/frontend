@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <title>Page Not Found | ROOMMATE</title>
+    <script>
+        (function () {
+            try {
+                var savedTheme = localStorage.getItem('theme-preference');
+                var preferredTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-appearance', preferredTheme);
+            } catch (error) {}
+        }());
+    </script>
+    <link rel="stylesheet" href="css/global.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/404.css" />
+    <meta charset="UTF-8" />
+    <meta name="description" content="The page you are looking for could not be found." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<body class="not-found-page">
+    <div id="navbar-placeholder">
+        <header class="main-header">
+            <nav class="nav-container" aria-label="Main navigation">
+                <div class="logo">
+                    <a href="index.html" class="main-logo">ROOMMATE</a>
+                </div>
+                <button class="nav-menu-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" onclick="toggleMobileNav()">
+                    <i data-lucide="menu" aria-hidden="true"></i>
+                </button>
+                <div class="nav-links" id="main-navigation">
+                    <a href="index.html#features">Features</a>
+                    <a href="index.html#about">About</a>
+                    <button class="btn-icon theme-toggle" type="button" onclick="toggleDarkMode()" title="Switch to dark mode" aria-label="Switch to dark mode">
+                        <i data-lucide="sun" class="sun-icon"></i>
+                        <i data-lucide="moon" class="moon-icon"></i>
+                    </button>
+                    <a href="pages/auth/login.html" class="btn btn-secondary">Login</a>
+                </div>
+            </nav>
+        </header>
+    </div>
+
+    <main class="not-found-main">
+        <section class="not-found-hero" aria-labelledby="not-found-title">
+            <div class="not-found-copy">
+                <p class="not-found-kicker">ROOMMATE / LOST ROUTE</p>
+                <h2>This room is<br />not available.</h2>
+                <p class="not-found-description">
+                    The page you are looking for may have moved, been reserved, or never existed.
+                    Let’s get you back to a place that does.
+                </p>
+                <p class="home-countdown" role="status" aria-live="polite">
+                    Taking you home in <strong id="countdown">5</strong>
+                </p>
+            </div>
+
+            <div class="not-found-code" aria-hidden="true">404<span>.</span></div>
+        </section>
+    </main>
+
+    <div id="footer-placeholder"></div>
+    <div id="modal-placeholder"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadComponent('navbar', 'navbar-placeholder');
+            loadComponent('footer', 'footer-placeholder');
+            loadComponent('modal', 'modal-placeholder');
+            if (window.lucide) window.lucide.createIcons();
+
+            var remaining = 5;
+            var countdown = document.getElementById('countdown');
+            var timer = window.setInterval(() => {
+                remaining -= 1;
+                countdown.textContent = remaining;
+                if (remaining <= 0) {
+                    window.clearInterval(timer);
+                    window.location.href = 'index.html';
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

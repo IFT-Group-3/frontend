@@ -1,0 +1,110 @@
+.not-found-page {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 80% 22%, hsl(var(--primary) / 0.1), transparent 28rem),
+        hsl(var(--background));
+}
+
+.not-found-main {
+    position: relative;
+    min-height: calc(100vh - 4rem);
+    display: flex;
+    align-items: center;
+}
+
+.not-found-hero {
+    width: min(1180px, 100%);
+    margin: 0 auto;
+    padding: 6rem 2rem 8rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: center;
+    position: relative;
+}
+
+.not-found-kicker {
+    color: hsl(var(--primary));
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+}
+
+.not-found-kicker {
+    margin-bottom: 1rem;
+}
+
+.not-found-copy h2 {
+    margin: 1rem 0;
+    color: hsl(var(--foreground));
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    letter-spacing: var(--tracking-tight);
+    line-height: 0.98;
+}
+
+.not-found-description {
+    max-width: 30rem;
+    margin: 0 0 2rem;
+    color: hsl(var(--muted-foreground));
+    line-height: var(--leading-relaxed);
+}
+
+.not-found-code {
+    position: absolute;
+    right: 1rem;
+    bottom: -4rem;
+    color: hsl(var(--primary));
+    font-size: clamp(10rem, 30vw, 28rem);
+    font-weight: 700;
+    letter-spacing: -0.12em;
+    line-height: 0.75;
+    opacity: 0.12;
+    pointer-events: none;
+    user-select: none;
+    z-index: 0;
+}
+
+.not-found-code span {
+    color: hsl(var(--foreground));
+}
+
+.not-found-copy {
+    position: relative;
+    z-index: 1;
+}
+
+.home-countdown {
+    margin-top: 1rem;
+    color: hsl(var(--muted-foreground));
+    font-size: var(--font-size-sm);
+}
+
+.home-countdown strong {
+    display: inline-block;
+    min-width: 1.25rem;
+    color: hsl(var(--primary));
+    font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 800px) {
+    .not-found-hero {
+        grid-template-columns: 1fr;
+        padding-top: 4rem;
+    }
+
+    .not-found-code {
+        right: -1rem;
+        bottom: -2rem;
+        font-size: clamp(9rem, 40vw, 16rem);
+    }
+}
+
+@media (max-width: 480px) {
+    .not-found-hero {
+        padding: 3rem 1rem 5rem;
+    }
+
+    .not-found-copy h2 {
+        margin-top: 2rem;
+    }
+}
