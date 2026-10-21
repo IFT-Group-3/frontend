@@ -45,8 +45,7 @@
             <form class="auth-form" action="../admin/dashboard.html" onsubmit="handleAdminLogin(event, this)" novalidate>
                 <div class="form-group">
                     <label class="label" for="admin-email">Staff Email</label>
-                    <input type="email" id="admin-email" class="input" placeholder="name@ui.edu.ng" autocomplete="username" required oninput="validateStaffEmail(this, document.getElementById('admin-email-error'))" />
-                    <p id="admin-email-error" class="field-warning" role="alert" hidden></p>
+                    <input type="email" id="admin-email" class="input" placeholder="name@ui.edu.ng" autocomplete="username" required />
                 </div>
 
                 <div class="form-group">
@@ -91,15 +90,30 @@
         }
 
         function handleAdminLogin(event, form) {
+            handleAdministratorLogin(event, form);
+        }
+
+        async function handleAdministratorLogin(event, form) {
             event.preventDefault();
             const email = document.getElementById('admin-email');
-            if (!validateStaffEmail(email, document.getElementById('admin-email-error')) || !form.checkValidity()) {
+            if (!form.checkValidity()) {
                 form.reportValidity();
                 email.focus();
                 return;
             }
+            const error = document.getElementById('admin-login-error');
+            error.hidden = true;
             setBtnLoading(form.querySelector('button[type="submit"]'), true);
-            setTimeout(() => { window.location.href = form.action; }, 700);
+            try {
+                const user = await signIn(email.value, document.getElementById('admin-password').value);
+                window.location.href = user.role === 'admin'
+                    ? '../admin/dashboard.html'
+                    : '../student/dashboard.html';
+            } catch (requestError) {
+                error.textContent = requestError.message;
+                error.hidden = false;
+                setBtnLoading(form.querySelector('button[type="submit"]'), false);
+            }
         }
     </script>
 </body>
