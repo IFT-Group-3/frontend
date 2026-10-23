@@ -1,0 +1,85 @@
+{
+"success": true,
+"rooms": [
+{
+"id": 12,
+"code": "A102",
+"hostel": "Kuti Hall",
+"block": "Block A",
+"total_beds": 4,
+"occupied": 3,
+"reserved": 0,
+"available": 1
+},
+{
+"id": 13,
+"code": "A103",
+"hostel": "Kuti Hall",
+"block": "Block A",
+"total_beds": 4,
+"occupied": 4,
+"reserved": 0,
+"available": 0
+},
+{
+"id": 14,
+"code": "A108",
+"hostel": "Kuti Hall",
+"block": "Block A",
+"total_beds": 4,
+"occupied": 2,
+"reserved": 0,
+"available": 2
+},
+{
+"id": 15,
+"code": "B201",
+"hostel": "Kuti Hall",
+"block": "Block B",
+"total_beds": 2,
+"occupied": 1,
+"reserved": 0,
+"available": 1
+},
+{
+"id": 16,
+"code": "B204",
+"hostel": "Kuti Hall",
+"block": "Block B",
+"total_beds": 4,
+"occupied": 2,
+"reserved": 1,
+"available": 1
+},
+{
+"id": 17,
+"code": "C301",
+"hostel": "Kuti Hall",
+"block": "Block C",
+"total_beds": 4,
+"occupied": 4,
+"reserved": 0,
+"available": 0
+},
+{
+"id": 21,
+"code": "C201",
+"hostel": "Mellanby Hall",
+"block": "Block C",
+"total_beds": 4,
+"occupied": 3,
+"reserved": 0,
+"available": 1
+},
+{
+"id": 22,
+"code": "D302",
+"hostel": "Azikiwe Hall",
+"block": "Block D",
+"total_beds": 4,
+"occupied": 3,
+"reserved": 0,
+"available": 1
+}
+]
+}

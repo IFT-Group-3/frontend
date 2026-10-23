@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<script>(function(){try{var t=localStorage.getItem('theme-preference')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-appearance',t)}catch(e){}}());</script>
+<link rel="stylesheet" href="../../css/global.css"><link rel="stylesheet" href="../../css/admin.css"><title>Allocations | Hostel Administration</title></head>
+<body class="a-body">
+<main id="content">
+  <div class="a-toolbar"><div class="a-find"><span class="fi"></span><input class="a-input" type="search" placeholder="Search allocations" aria-label="Search allocations"></div>
+    <select class="a-input" id="f-session" aria-label="Filter by session"><option value="">All sessions</option></select>
+    <select class="a-input" id="f-hostel" aria-label="Filter by hostel"><option value="">All hostels</option></select>
+    <select class="a-input" id="f-status" aria-label="Filter by status"><option value="">All statuses</option><option value="active">Active</option><option value="pending">Pending</option><option value="cancelled">Cancelled</option></select>
+  </div>
+  <div id="kpis"></div>
+  <div class="a-rows" id="list"></div><div class="a-pager" id="pager"></div></main>
+<script src="../../js/admin.js"></script>
+<script>
+const { ADMIN, esc, naira, wait, failure, fetchJson, adminApi, adminSession, aicon, abadge, aState, aToast, mountAdminShell, bindSearch, pendingFeature, tableHtml, pagerHtml, kpiHtml, summaryHtml, fillSelect, downloadCsv } = AdminKit;
+mountAdminShell({ active: 'allocations', title: 'Allocations', subtitle: 'Monitor current and historical bed assignments.', searchPlaceholder: 'Search allocations' });
+document.querySelectorAll('.fi').forEach(function (e) { e.innerHTML = aicon('search'); });
+var list = document.getElementById('list'), pager = document.getElementById('pager');
+var all = [], q = '', sess = '', host = '', stat = '', page = 1, PER = 5;
+var COLS = [
+  { label: 'Matric', cell: function (a) { return '<strong>' + esc(a.matric) + '</strong>'; } },
+  { label: 'Student', cell: function (a) { return esc(a.name); } },
+  { label: 'Hostel', cell: function (a) { return esc(a.hostel); } },
+  { label: 'Room', cell: function (a) { return esc(a.room); } },
+  { label: 'Bed', cell: function (a) { return esc(a.bed); } },
+  { label: 'Session', cell: function (a) { return esc(a.session); } },
+  { label: 'Date', cell: function (a) { return esc(a.date); } },
+  { label: 'Status', cell: function (a) { return abadge(a.status); } }
+];
+function view() {
+  return all.filter(function (a) {
+    return (!q || (a.name + ' ' + a.matric).toLowerCase().indexOf(q) > -1) && (!sess || a.session === sess) && (!host || a.hostel === host) && (!stat || a.status === stat);
+  });
+}
+function render() {
+  var rows = view(), pages = Math.max(1, Math.ceil(rows.length / PER));
+  if (page > pages) page = pages;
+  var shown = rows.slice((page - 1) * PER, page * PER);
+  if (!shown.length) { aState(list, 'empty', 'No allocations match your filters.'); pager.innerHTML = ''; return; }
+  list.innerHTML = tableHtml(COLS, '1fr 1.2fr 1.3fr .6fr .6fr .9fr 1fr 120px', shown, function (a) {
+    return { name: a.name, badge: abadge(a.status), meta: a.matric + ' \u00B7 ' + a.date, meta2: a.hostel + ' \u00B7 ' + a.room + ' \u00B7 ' + a.bed };
+  });
+  pager.innerHTML = pagerHtml(page, pages, shown.length, rows.length, 'allocations');
+}
+pager.addEventListener('click', function (e) { var b = e.target.closest('[data-p]'); if (b && !b.disabled) { page = +b.dataset.p; render(); } });
+bindSearch(function (v) { q = v; page = 1; render(); });
+[['f-session', function (v) { sess = v; }], ['f-hostel', function (v) { host = v; }], ['f-status', function (v) { stat = v; }]].forEach(function (f) {
+  document.getElementById(f[0]).onchange = function (e) { f[1](e.target.value); page = 1; render(); };
+});
+async function load() {
+  aState(list, 'loading', 'Loading allocations...'); pager.innerHTML = '';
+  var res = await adminApi.allocations();
+  if (!res.success) return aState(list, 'error', res.message || 'Could not load allocations.', load);
+  all = res.allocations; var s = res.summary;
+  document.getElementById('kpis').innerHTML = kpiHtml([{ label: 'Active', value: s.active.toLocaleString() }, { label: 'Pending', value: s.pending }, { label: 'Cancelled', value: s.cancelled }, { label: 'Allocation rate', value: s.rate }]) +
+    summaryHtml([s.active.toLocaleString() + ' Active \u00B7 ' + s.pending + ' Pending', s.cancelled + ' Cancelled']);
+  fillSelect('f-session', all.map(function (a) { return a.session; })); fillSelect('f-hostel', all.map(function (a) { return a.hostel; }));
+  render();
+}
+load();
+</script></body></html>

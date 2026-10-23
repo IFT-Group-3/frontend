@@ -1,0 +1,113 @@
+{
+"success": true,
+"hostels": [
+{
+"id": 1,
+"name": "Kuti Hall",
+"gender": "Male",
+"rooms": 80,
+"beds": 320,
+"available": 42,
+"status": "active"
+},
+{
+"id": 2,
+"name": "Azikiwe Hall",
+"gender": "Female",
+"rooms": 70,
+"beds": 280,
+"available": 67,
+"status": "active"
+},
+{
+"id": 3,
+"name": "Mellanby Hall",
+"gender": "Male",
+"rooms": 78,
+"beds": 312,
+"available": 18,
+"status": "active"
+},
+{
+"id": 4,
+"name": "Idia Hall",
+"gender": "Female",
+"rooms": 74,
+"beds": 296,
+"available": 74,
+"status": "active"
+},
+{
+"id": 5,
+"name": "Tedder Hall",
+"gender": "Male",
+"rooms": 62,
+"beds": 248,
+"available": 39,
+"status": "maintenance"
+},
+{
+"id": 6,
+"name": "Independence Hall",
+"gender": "Male",
+"rooms": 96,
+"beds": 384,
+"available": 34,
+"status": "active"
+},
+{
+"id": 7,
+"name": "Sultan Bello Hall",
+"gender": "Male",
+"rooms": 70,
+"beds": 280,
+"available": 25,
+"status": "active"
+},
+{
+"id": 8,
+"name": "Queen Elizabeth II Hall",
+"gender": "Female",
+"rooms": 64,
+"beds": 256,
+"available": 31,
+"status": "active"
+},
+{
+"id": 9,
+"name": "Alexander Brown Hall",
+"gender": "Male",
+"rooms": 58,
+"beds": 232,
+"available": 12,
+"status": "active"
+},
+{
+"id": 10,
+"name": "Awolowo Hall",
+"gender": "Male",
+"rooms": 72,
+"beds": 288,
+"available": 40,
+"status": "active"
+},
+{
+"id": 11,
+"name": "Balewa Hall",
+"gender": "Male",
+"rooms": 66,
+"beds": 264,
+"available": 22,
+"status": "maintenance"
+},
+{
+"id": 12,
+"name": "Queen Amina Hall",
+"gender": "Female",
+"rooms": 60,
+"beds": 240,
+"available": 53,
+"status": "active"
+}
+]
+}

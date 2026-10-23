@@ -1,0 +1,118 @@
+{
+"success": true,
+"total_records": 3487,
+"students": [
+{
+"id": 1,
+"matric": "UI/25/1048",
+"name": "Amina Yusuf",
+"department": "Computer Science",
+"level": "100 Level",
+"email": "a.yusuf@stu.ui.edu.ng",
+"status": "allocated",
+"payment": "paid",
+"allocation": {
+"hostel": "Kuti Hall",
+"room": "A102",
+"bed": "B04"
+}
+},
+{
+"id": 2,
+"matric": "UI/24/0832",
+"name": "Chinedu Okafor",
+"department": "Economics",
+"level": "200 Level",
+"email": "c.okafor@stu.ui.edu.ng",
+"status": "pending",
+"payment": "pending",
+"allocation": {
+"hostel": "Mellanby Hall",
+"room": "C201",
+"bed": "B02"
+}
+},
+{
+"id": 3,
+"matric": "UI/23/0521",
+"name": "Kemi Balogun",
+"department": "Pharmacy",
+"level": "300 Level",
+"email": "k.balogun@stu.ui.edu.ng",
+"status": "allocated",
+"payment": "failed",
+"allocation": {
+"hostel": "Idia Hall",
+"room": "B110",
+"bed": "B01"
+}
+},
+{
+"id": 4,
+"matric": "UI/25/1189",
+"name": "Yusuf Kareem",
+"department": "Law",
+"level": "100 Level",
+"email": "y.kareem@stu.ui.edu.ng",
+"status": "unallocated",
+"payment": "none",
+"allocation": null
+},
+{
+"id": 5,
+"matric": "UI/22/0344",
+"name": "Bisi Adeola",
+"department": "Medicine",
+"level": "400 Level",
+"email": "b.adeola@stu.ui.edu.ng",
+"status": "allocated",
+"payment": "paid",
+"allocation": {
+"hostel": "Azikiwe Hall",
+"room": "D302",
+"bed": "B03"
+}
+},
+{
+"id": 6,
+"matric": "UI/25/1210",
+"name": "Tolu Bankole",
+"department": "Engineering",
+"level": "100 Level",
+"email": "t.bankole@stu.ui.edu.ng",
+"status": "allocated",
+"payment": "paid",
+"allocation": {
+"hostel": "Awolowo Hall",
+"room": "A114",
+"bed": "B02"
+}
+},
+{
+"id": 7,
+"matric": "UI/24/0977",
+"name": "Ngozi Eze",
+"department": "Law",
+"level": "200 Level",
+"email": "n.eze@stu.ui.edu.ng",
+"status": "unallocated",
+"payment": "none",
+"allocation": null
+},
+{
+"id": 8,
+"matric": "UI/23/0615",
+"name": "Sani Danladi",
+"department": "Computer Science",
+"level": "300 Level",
+"email": "s.danladi@stu.ui.edu.ng",
+"status": "pending",
+"payment": "pending",
+"allocation": {
+"hostel": "Sultan Bello Hall",
+"room": "C210",
+"bed": "B01"
+}
+}
+]
+}
