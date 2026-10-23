@@ -1,0 +1,164 @@
+{
+"success": true,
+"rooms": {
+"12": [
+{
+"code": "B01",
+"status": "occupied",
+"student": "F. Adeyemi"
+},
+{
+"code": "B02",
+"status": "occupied",
+"student": "M. Okon"
+},
+{
+"code": "B03",
+"status": "occupied",
+"student": "K. Bello"
+},
+{
+"code": "B04",
+"status": "available"
+}
+],
+"13": [
+{
+"code": "B01",
+"status": "occupied",
+"student": "T. Ojo"
+},
+{
+"code": "B02",
+"status": "occupied",
+"student": "S. Ali"
+},
+{
+"code": "B03",
+"status": "occupied",
+"student": "D. Eze"
+},
+{
+"code": "B04",
+"status": "occupied",
+"student": "P. Musa"
+}
+],
+"14": [
+{
+"code": "B01",
+"status": "occupied",
+"student": "A. Lawal"
+},
+{
+"code": "B02",
+"status": "available"
+},
+{
+"code": "B03",
+"status": "occupied",
+"student": "C. Obi"
+},
+{
+"code": "B04",
+"status": "available"
+}
+],
+"15": [
+{
+"code": "B01",
+"status": "occupied",
+"student": "J. Danjuma"
+},
+{
+"code": "B02",
+"status": "available"
+}
+],
+"16": [
+{
+"code": "B01",
+"status": "occupied",
+"student": "R. Bassey"
+},
+{
+"code": "B02",
+"status": "occupied",
+"student": "L. Ige"
+},
+{
+"code": "B03",
+"status": "reserved",
+"hold_minutes": 18
+},
+{
+"code": "B04",
+"status": "available"
+}
+],
+"17": [
+{
+"code": "B01",
+"status": "occupied",
+"student": "E. Yakubu"
+},
+{
+"code": "B02",
+"status": "occupied",
+"student": "G. Nwosu"
+},
+{
+"code": "B03",
+"status": "occupied",
+"student": "H. Sani"
+},
+{
+"code": "B04",
+"status": "occupied",
+"student": "I. Peters"
+}
+],
+"21": [
+{
+"code": "B01",
+"status": "occupied",
+"student": "B. Tella"
+},
+{
+"code": "B02",
+"status": "occupied",
+"student": "N. Wale"
+},
+{
+"code": "B03",
+"status": "occupied",
+"student": "U. Garba"
+},
+{
+"code": "B04",
+"status": "available"
+}
+],
+"22": [
+{
+"code": "B01",
+"status": "occupied",
+"student": "O. Femi"
+},
+{
+"code": "B02",
+"status": "occupied",
+"student": "Y. Ade"
+},
+{
+"code": "B03",
+"status": "occupied",
+"student": "V. Okoro"
+},
+{
+"code": "B04",
+"status": "available"
+}
+]
+}
+}

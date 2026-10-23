@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<script>(function(){try{var t=localStorage.getItem('theme-preference')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-appearance',t)}catch(e){}}());</script>
+<link rel="stylesheet" href="../../css/global.css"><link rel="stylesheet" href="../../css/admin.css"><title>Hostels | Hostel Administration</title></head>
+<body class="a-body">
+<main id="content">
+  <div class="a-toolbar">
+    <div class="a-find"><span id="find-icon"></span><input class="a-input" type="search" placeholder="Search hostels" aria-label="Search hostels"></div>
+    <select class="a-input" id="f-type" aria-label="Filter by type"><option value="">All types</option><option>Male</option><option>Female</option></select>
+    <select class="a-input" id="f-status" aria-label="Filter by status"><option value="">All statuses</option><option value="active">Active</option><option value="maintenance">Maintenance</option></select>
+    <button class="a-btn a-btn-primary" id="add"></button>
+  </div>
+  <div class="a-rows" id="list"></div>
+  <div class="a-pager" id="pager"></div>
+</main>
+<script src="../../js/admin.js"></script>
+<script>
+const { ADMIN, esc, naira, wait, failure, fetchJson, adminApi, adminSession, aicon, abadge, aState, aToast, mountAdminShell, bindSearch, pendingFeature, tableHtml, pagerHtml, kpiHtml, summaryHtml, fillSelect, downloadCsv } = AdminKit;
+mountAdminShell({ active: 'hostels', title: 'Hostels', subtitle: 'Manage hostel inventory, capacity and status.', searchPlaceholder: 'Search hostels' });
+document.getElementById('find-icon').innerHTML = aicon('search');
+document.getElementById('add').innerHTML = '+ Add Hostel';
+document.getElementById('add').onclick = pendingFeature('Add hostel');
+var list = document.getElementById('list'), pager = document.getElementById('pager');
+var all = [], q = '', type = '', status = '', page = 1, PER = 6;
+
+function view() {
+  return all.filter(function (h) {
+    return (!q || (h.name + ' ' + h.gender).toLowerCase().indexOf(q) > -1) && (!type || h.gender === type) && (!status || h.status === status);
+  });
+}
+function render() {
+  var rows = view(), pages = Math.max(1, Math.ceil(rows.length / PER));
+  if (page > pages) page = pages;
+  var shown = rows.slice((page - 1) * PER, page * PER);
+  if (!shown.length) { aState(list, 'empty', 'No hostels match your filters.'); pager.innerHTML = ''; return; }
+  list.innerHTML = '<div class="a-thead cols-hostels d-only"><span>Hostel</span><span>Type</span><span>Rooms</span><span>Beds</span><span>Available</span><span>Status</span></div>' +
+    shown.map(function (h) {
+      return '<div class="a-row cols-hostels"><span class="name">' + esc(h.name) + '</span><span class="d-only">' + esc(h.gender) + '</span><span class="d-only">' + h.rooms + ' rooms</span>' +
+        '<span class="d-only">' + h.beds + ' beds</span><span class="d-only">' + h.available + ' available</span>' +
+        '<span class="m-only meta">' + esc(h.gender) + ' \u00B7 ' + h.rooms + ' rooms \u00B7 ' + h.beds + ' beds</span><span class="m-only avail">' + h.available + ' beds available</span>' +
+        '<span class="badge">' + abadge(h.status) + '</span></div>';
+    }).join('');
+  var btns = '<button class="a-btn a-btn-ghost" data-p="' + (page - 1) + '"' + (page === 1 ? ' disabled' : '') + '>Previous</button>';
+  for (var i = 1; i <= pages; i++) btns += '<button class="a-btn a-btn-ghost" data-p="' + i + '"' + (i === page ? ' aria-current="page"' : '') + '>' + i + '</button>';
+  btns += '<button class="a-btn a-btn-ghost" data-p="' + (page + 1) + '"' + (page === pages ? ' disabled' : '') + '>Next</button>';
+  pager.innerHTML = '<span>Showing ' + shown.length + ' of ' + rows.length + ' hostels</span><div class="btns">' + btns + '</div>';
+}
+pager.addEventListener('click', function (e) { var b = e.target.closest('[data-p]'); if (b && !b.disabled) { page = +b.dataset.p; render(); } });
+bindSearch(function (v) { q = v; page = 1; render(); });
+document.getElementById('f-type').onchange = function (e) { type = e.target.value; page = 1; render(); };
+document.getElementById('f-status').onchange = function (e) { status = e.target.value; page = 1; render(); };
+async function load() {
+  aState(list, 'loading', 'Loading hostels...'); pager.innerHTML = '';
+  var res = await adminApi.hostels();
+  if (!res.success) return aState(list, 'error', res.message || 'Could not load hostels.', load);
+  all = res.hostels; render();
+}
+load();
+</script></body></html>

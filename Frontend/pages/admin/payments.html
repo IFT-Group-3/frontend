@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<script>(function(){try{var t=localStorage.getItem('theme-preference')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-appearance',t)}catch(e){}}());</script>
+<link rel="stylesheet" href="../../css/global.css"><link rel="stylesheet" href="../../css/admin.css"><title>Payments | Hostel Administration</title></head>
+<body class="a-body">
+<main id="content">
+  <div class="a-toolbar"><div class="a-find"><span class="fi"></span><input class="a-input" type="search" placeholder="Search invoices" aria-label="Search invoices"></div>
+    <select class="a-input" id="f-status" aria-label="Filter by status"><option value="">All statuses</option><option value="paid">Paid</option><option value="pending">Pending</option><option value="failed">Failed</option></select>
+    <button class="a-btn a-btn-primary" id="export">Export CSV</button>
+  </div>
+  <div id="kpis"></div>
+  <div class="a-rows" id="list"></div><div class="a-pager" id="pager"></div></main>
+<script src="../../js/admin.js"></script>
+<script>
+const { ADMIN, esc, naira, wait, failure, fetchJson, adminApi, adminSession, aicon, abadge, aState, aToast, mountAdminShell, bindSearch, pendingFeature, tableHtml, pagerHtml, kpiHtml, summaryHtml, fillSelect, downloadCsv } = AdminKit;
+mountAdminShell({ active: 'payments', title: 'Payments', subtitle: 'Track accommodation invoices and transactions.', searchPlaceholder: 'Search invoices' });
+document.querySelectorAll('.fi').forEach(function (e) { e.innerHTML = aicon('search'); });
+var list = document.getElementById('list'), pager = document.getElementById('pager');
+var all = [], q = '', stat = '', page = 1, PER = 5;
+var COLS = [
+  { label: 'Invoice', cell: function (p) { return '<strong>' + esc(p.invoice) + '</strong>'; } },
+  { label: 'Student', cell: function (p) { return esc(p.student); } },
+  { label: 'Amount', cell: function (p) { return naira(p.amount); } },
+  { label: 'Payment reference', cell: function (p) { return p.payment_ref ? esc(p.payment_ref) : '\u2014'; } },
+  { label: 'Date', cell: function (p) { return esc(p.date); } },
+  { label: 'Status', cell: function (p) { return abadge(p.status); } }
+];
+function view() {
+  return all.filter(function (p) {
+    return (!q || (p.invoice + ' ' + p.student + ' ' + p.payment_ref).toLowerCase().indexOf(q) > -1) && (!stat || p.status === stat);
+  });
+}
+function render() {
+  var rows = view(), pages = Math.max(1, Math.ceil(rows.length / PER));
+  if (page > pages) page = pages;
+  var shown = rows.slice((page - 1) * PER, page * PER);
+  if (!shown.length) { aState(list, 'empty', 'No payments match your filters.'); pager.innerHTML = ''; return; }
+  list.innerHTML = tableHtml(COLS, '1.3fr 1.2fr .9fr 1.3fr 1fr 120px', shown, function (p) {
+    return { name: p.invoice, badge: abadge(p.status), meta: p.student + ' \u00B7 ' + (p.payment_ref || 'No payment reference'), meta2: naira(p.amount) + ' \u00B7 ' + p.date };
+  });
+  pager.innerHTML = pagerHtml(page, pages, shown.length, rows.length, 'payments');
+}
+pager.addEventListener('click', function (e) { var b = e.target.closest('[data-p]'); if (b && !b.disabled) { page = +b.dataset.p; render(); } });
+bindSearch(function (v) { q = v; page = 1; render(); });
+document.getElementById('f-status').onchange = function (e) { stat = e.target.value; page = 1; render(); };
+document.getElementById('export').onclick = function () {
+  var rows = view();
+  if (!rows.length) return aToast('There are no payments to export.');
+  downloadCsv('payments.csv', ['Invoice', 'Student', 'Amount (NGN)', 'Payment reference', 'Date', 'Status'],
+    rows.map(function (p) { return [p.invoice, p.student, p.amount, p.payment_ref, p.date, p.status]; }));
+  aToast('Exported ' + rows.length + ' payments.');
+};
+async function load() {
+  aState(list, 'loading', 'Loading payments...'); pager.innerHTML = '';
+  var res = await adminApi.payments();
+  if (!res.success) return aState(list, 'error', res.message || 'Could not load payments.', load);
+  all = res.payments; var s = res.summary;
+  document.getElementById('kpis').innerHTML = kpiHtml([{ label: 'Collected', value: s.collected, note: s.collected_note }, { label: 'Pending', value: s.pending, note: s.pending_note }, { label: 'Failed', value: s.failed, note: s.failed_note }]) +
+    summaryHtml([s.collected + ' Collected', s.pending + ' Pending \u00B7 ' + s.failed + ' Failed']);
+  render();
+}
+load();
+</script></body></html>

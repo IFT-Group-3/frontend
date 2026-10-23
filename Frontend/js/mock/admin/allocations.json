@@ -1,0 +1,99 @@
+{
+"success": true,
+"summary": {
+"active": 3126,
+"pending": 84,
+"cancelled": 23,
+"rate": "82.6%"
+},
+"allocations": [
+{
+"id": 1,
+"matric": "UI/25/1048",
+"name": "Amina Yusuf",
+"hostel": "Kuti Hall",
+"room": "A102",
+"bed": "B04",
+"session": "2026/2027",
+"date": "01 Oct 2026",
+"status": "active"
+},
+{
+"id": 2,
+"matric": "UI/24/0832",
+"name": "Chinedu Okafor",
+"hostel": "Mellanby Hall",
+"room": "C201",
+"bed": "B02",
+"session": "2026/2027",
+"date": "01 Oct 2026",
+"status": "pending"
+},
+{
+"id": 3,
+"matric": "UI/23/0521",
+"name": "Kemi Balogun",
+"hostel": "Idia Hall",
+"room": "B110",
+"bed": "B01",
+"session": "2026/2027",
+"date": "30 Sep 2026",
+"status": "active"
+},
+{
+"id": 4,
+"matric": "UI/25/1189",
+"name": "Yusuf Kareem",
+"hostel": "Tedder Hall",
+"room": "A207",
+"bed": "B03",
+"session": "2026/2027",
+"date": "29 Sep 2026",
+"status": "cancelled"
+},
+{
+"id": 5,
+"matric": "UI/22/0344",
+"name": "Bisi Adeola",
+"hostel": "Azikiwe Hall",
+"room": "D302",
+"bed": "B03",
+"session": "2026/2027",
+"date": "28 Sep 2026",
+"status": "active"
+},
+{
+"id": 6,
+"matric": "UI/25/1210",
+"name": "Tolu Bankole",
+"hostel": "Awolowo Hall",
+"room": "A114",
+"bed": "B02",
+"session": "2026/2027",
+"date": "27 Sep 2026",
+"status": "active"
+},
+{
+"id": 7,
+"matric": "UI/23/0615",
+"name": "Sani Danladi",
+"hostel": "Sultan Bello Hall",
+"room": "C210",
+"bed": "B01",
+"session": "2026/2027",
+"date": "27 Sep 2026",
+"status": "pending"
+},
+{
+"id": 8,
+"matric": "UI/24/0977",
+"name": "Ngozi Eze",
+"hostel": "Alexander Brown Hall",
+"room": "B105",
+"bed": "B03",
+"session": "2026/2027",
+"date": "26 Sep 2026",
+"status": "cancelled"
+}
+]
+}

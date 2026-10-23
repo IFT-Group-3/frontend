@@ -1,0 +1,5 @@
+{"success":true,
+"totals":{"hostels":12,"male":8,"female":4,"rooms":946,"beds":3784,"occupied":3126,"available":658,"pending_payments":84,"outstanding":"\u20A64.2m"},
+"hostels":[{"name":"Kuti","total":320,"available":42},{"name":"Azikiwe","total":280,"available":67},{"name":"Mellanby","total":312,"available":18},{"name":"Idia","total":296,"available":74},{"name":"Tedder","total":248,"available":39},{"name":"Independence","total":384,"available":34}],
+"recent_allocations":[{"matric":"UI/25/1048","name":"Amina Yusuf","location":"Kuti Hall \u00B7 A102 \u00B7 B04","when":"Today, 09:42","status":"active"},{"matric":"UI/24/0832","name":"Chinedu Okafor","location":"Mellanby Hall \u00B7 C201 \u00B7 B02","when":"Today, 09:36","status":"pending"}],
+"recent_payments":[{"ref":"INV-2026-00124","name":"Amina Yusuf","amount":50000,"status":"paid"},{"ref":"INV-2026-00118","name":"Kemi Balogun","amount":50000,"status":"failed"}]}

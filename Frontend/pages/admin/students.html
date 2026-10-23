@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<script>(function(){try{var t=localStorage.getItem('theme-preference')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-appearance',t)}catch(e){}}());</script>
+<link rel="stylesheet" href="../../css/global.css"><link rel="stylesheet" href="../../css/admin.css"><title>Students | Hostel Administration</title></head>
+<body class="a-body">
+<main id="content">
+  <div class="a-toolbar"><div class="a-find"><span class="fi"></span><input class="a-input" type="search" placeholder="Search students" aria-label="Search students"></div>
+    <select class="a-input" id="f-dept" aria-label="Filter by department"><option value="">Department</option></select>
+    <select class="a-input" id="f-level" aria-label="Filter by level"><option value="">Level</option></select>
+    <select class="a-input" id="f-status" aria-label="Filter by allocation status"><option value="">Allocation status</option><option value="allocated">Allocated</option><option value="pending">Pending</option><option value="unallocated">Unallocated</option></select>
+  </div>
+  <div class="a-split"><div><div class="a-rows" id="list"></div><div class="a-pager" id="pager" style="margin-top:12px"></div></div>
+  <aside class="a-card a-panel" id="panel" aria-live="polite"></aside></div></main>
+<script src="../../js/admin.js"></script>
+<script>
+const { ADMIN, esc, naira, wait, failure, fetchJson, adminApi, adminSession, aicon, abadge, aState, aToast, mountAdminShell, bindSearch, pendingFeature, tableHtml, pagerHtml, kpiHtml, summaryHtml, fillSelect, downloadCsv } = AdminKit;
+mountAdminShell({ active: 'students', title: 'Students', subtitle: 'Search student accommodation records.', searchPlaceholder: 'Search students' });
+document.querySelectorAll('.fi').forEach(function (e) { e.innerHTML = aicon('search'); });
+var list = document.getElementById('list'), pager = document.getElementById('pager'), panel = document.getElementById('panel');
+var all = [], total = 0, q = '', dept = '', level = '', stat = '', page = 1, PER = 5, selected = null;
+var place = function (s) { return s.allocation ? s.allocation.hostel.replace(' Hall', '') + ' ' + s.allocation.room + ' ' + s.allocation.bed : 'Not allocated'; };
+var COLS = [
+  { label: 'Matric', cell: function (s) { return '<strong>' + esc(s.matric) + '</strong>'; } },
+  { label: 'Name', cell: function (s) { return esc(s.name); } },
+  { label: 'Department', cell: function (s) { return esc(s.department); } },
+  { label: 'Level', cell: function (s) { return esc(s.level); } },
+  { label: 'Allocation', cell: function (s) { return esc(place(s)); } },
+  { label: 'Status', cell: function (s) { return abadge(s.status); } }
+];
+function view() {
+  return all.filter(function (s) {
+    return (!q || (s.name + ' ' + s.matric).toLowerCase().indexOf(q) > -1) && (!dept || s.department === dept) && (!level || s.level === level) && (!stat || s.status === stat);
+  });
+}
+function render() {
+  var rows = view(), pages = Math.max(1, Math.ceil(rows.length / PER));
+  if (page > pages) page = pages;
+  var shown = rows.slice((page - 1) * PER, page * PER);
+  if (!shown.length) { aState(list, 'empty', 'No students match your filters.'); pager.innerHTML = ''; return; }
+  list.innerHTML = tableHtml(COLS, '1fr 1.3fr 1.4fr .8fr 1.4fr 130px', shown, function (s) {
+    return { name: s.name, badge: abadge(s.status), meta: s.matric + ' \u00B7 ' + s.department + ' \u00B7 ' + s.level, meta2: s.allocation ? s.allocation.hostel + ' \u00B7 ' + s.allocation.room + ' \u00B7 ' + s.allocation.bed : 'Accommodation not allocated' };
+  }, { attrs: function (s) { return 'role="button" tabindex="0" data-id="' + s.id + '"'; }, active: function (s) { return s.id === selected; } });
+  pager.innerHTML = pagerHtml(page, pages, shown.length, rows.length, 'students (' + total.toLocaleString() + ' records in total)');
+}
+function showPanel(id) {
+  selected = id; render();
+  var s = all.find(function (x) { return x.id === id; }), a = s.allocation;
+  var pay = { paid: abadge('paid'), pending: abadge('pending'), failed: abadge('failed'), none: 'No invoice' }[s.payment];
+  panel.innerHTML = '<div class="a-who"><div class="a-avatar"></div><div><h2></h2><p class="a-caption"></p></div></div>' +
+    '<div><div class="a-kv"><span>Department</span><span>' + esc(s.department) + '</span></div><div class="a-kv"><span>Level</span><span>' + esc(s.level) + '</span></div><div class="a-kv"><span>Email</span><span>' + esc(s.email) + '</span></div></div>' +
+    '<h3>Current allocation</h3><div><div class="a-kv"><span>Hostel</span><span>' + (a ? esc(a.hostel) : 'Not allocated') + '</span></div><div class="a-kv"><span>Room / Bed</span><span>' + (a ? esc(a.room + ' / ' + a.bed) : '\u2014') + '</span></div><div class="a-kv"><span>Payment</span><span>' + pay + '</span></div></div>' +
+    '<button class="a-btn a-btn-soft a-btn-block" id="profile">View full profile</button>';
+  panel.querySelector('h2').textContent = s.name; panel.querySelector('.a-caption').textContent = s.matric;
+  document.getElementById('profile').onclick = pendingFeature('Full profile');
+  if (matchMedia('(max-width:1200px)').matches && id !== all[0].id) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+list.addEventListener('click', function (e) { var r = e.target.closest('[data-id]'); if (r) showPanel(+r.dataset.id); });
+list.addEventListener('keydown', function (e) { var r = e.target.closest('[data-id]'); if (r && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); showPanel(+r.dataset.id); } });
+pager.addEventListener('click', function (e) { var b = e.target.closest('[data-p]'); if (b && !b.disabled) { page = +b.dataset.p; render(); } });
+bindSearch(function (v) { q = v; page = 1; render(); });
+[['f-dept', function (v) { dept = v; }], ['f-level', function (v) { level = v; }], ['f-status', function (v) { stat = v; }]].forEach(function (f) {
+  document.getElementById(f[0]).onchange = function (e) { f[1](e.target.value); page = 1; render(); };
+});
+async function load() {
+  aState(list, 'loading', 'Loading students...'); pager.innerHTML = ''; panel.innerHTML = '<p class="a-muted">Select a student to see details.</p>';
+  var res = await adminApi.students();
+  if (!res.success) return aState(list, 'error', res.message || 'Could not load students.', load);
+  all = res.students; total = res.total_records || all.length;
+  fillSelect('f-dept', all.map(function (s) { return s.department; })); fillSelect('f-level', all.map(function (s) { return s.level; }));
+  render(); if (all.length) showPanel(all[0].id);
+}
+load();
+</script></body></html>

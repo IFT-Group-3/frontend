@@ -1,0 +1,85 @@
+{
+"success": true,
+"summary": {
+"collected": "\u20a6156.3m",
+"collected_note": "3,126 successful payments",
+"pending": "\u20a64.2m",
+"pending_note": "84 unpaid invoices",
+"failed": "\u20a6600k",
+"failed_note": "12 failed attempts"
+},
+"payments": [
+{
+"id": 1,
+"invoice": "INV-2026-00124",
+"student": "Amina Yusuf",
+"amount": 50000,
+"payment_ref": "PAY-UI-849201",
+"date": "01 Oct 2026",
+"status": "paid"
+},
+{
+"id": 2,
+"invoice": "INV-2026-00123",
+"student": "Chinedu Okafor",
+"amount": 50000,
+"payment_ref": "",
+"date": "01 Oct 2026",
+"status": "pending"
+},
+{
+"id": 3,
+"invoice": "INV-2026-00118",
+"student": "Kemi Balogun",
+"amount": 50000,
+"payment_ref": "PAY-UI-848992",
+"date": "30 Sep 2026",
+"status": "failed"
+},
+{
+"id": 4,
+"invoice": "INV-2026-00111",
+"student": "Bisi Adeola",
+"amount": 50000,
+"payment_ref": "PAY-UI-848806",
+"date": "29 Sep 2026",
+"status": "paid"
+},
+{
+"id": 5,
+"invoice": "INV-2026-00103",
+"student": "Yusuf Kareem",
+"amount": 50000,
+"payment_ref": "",
+"date": "28 Sep 2026",
+"status": "pending"
+},
+{
+"id": 6,
+"invoice": "INV-2026-00098",
+"student": "Tolu Bankole",
+"amount": 50000,
+"payment_ref": "PAY-UI-848701",
+"date": "27 Sep 2026",
+"status": "paid"
+},
+{
+"id": 7,
+"invoice": "INV-2026-00097",
+"student": "Sani Danladi",
+"amount": 50000,
+"payment_ref": "",
+"date": "27 Sep 2026",
+"status": "pending"
+},
+{
+"id": 8,
+"invoice": "INV-2026-00091",
+"student": "Ngozi Eze",
+"amount": 50000,
+"payment_ref": "PAY-UI-848650",
+"date": "26 Sep 2026",
+"status": "failed"
+}
+]
+}
