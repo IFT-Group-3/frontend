@@ -20,8 +20,8 @@ var list = document.getElementById('list'), pager = document.getElementById('pag
 var all = [], total = 0, q = '', dept = '', level = '', stat = '', page = 1, PER = 5, selected = null;
 var place = function (s) { return s.allocation ? s.allocation.hostel.replace(' Hall', '') + ' ' + s.allocation.room + ' ' + s.allocation.bed : 'Not allocated'; };
 var COLS = [
-  { label: 'Matric', cell: function (s) { return '<strong>' + esc(s.matric) + '</strong>'; } },
-  { label: 'Name', cell: function (s) { return esc(s.name); } },
+  { label: 'Matric', cell: function (s) { return '<strong>' + esc(s.matric_number) + '</strong>'; } },
+  { label: 'Name', cell: function (s) { return esc(s.first_name); } },
   { label: 'Department', cell: function (s) { return esc(s.department); } },
   { label: 'Level', cell: function (s) { return esc(s.level); } },
   { label: 'Allocation', cell: function (s) { return esc(place(s)); } },
@@ -29,7 +29,7 @@ var COLS = [
 ];
 function view() {
   return all.filter(function (s) {
-    return (!q || (s.name + ' ' + s.matric).toLowerCase().indexOf(q) > -1) && (!dept || s.department === dept) && (!level || s.level === level) && (!stat || s.status === stat);
+    return (!q || (s.first_name + ' ' + s.matric_number).toLowerCase().indexOf(q) > -1) && (!dept || s.department === dept) && (!level || s.level === level) && (!stat || s.status === stat);
   });
 }
 function render() {
@@ -38,7 +38,7 @@ function render() {
   var shown = rows.slice((page - 1) * PER, page * PER);
   if (!shown.length) { aState(list, 'empty', 'No students match your filters.'); pager.innerHTML = ''; return; }
   list.innerHTML = tableHtml(COLS, '1fr 1.3fr 1.4fr .8fr 1.4fr 130px', shown, function (s) {
-    return { name: s.name, badge: abadge(s.status), meta: s.matric + ' \u00B7 ' + s.department + ' \u00B7 ' + s.level, meta2: s.allocation ? s.allocation.hostel + ' \u00B7 ' + s.allocation.room + ' \u00B7 ' + s.allocation.bed : 'Accommodation not allocated' };
+    return { name: s.first_name, badge: abadge(s.status), meta: s.matric_number + ' \u00B7 ' + s.department + ' \u00B7 ' + s.level, meta2: s.allocation ? s.allocation.hostel + ' \u00B7 ' + s.allocation.room + ' \u00B7 ' + s.allocation.bed : 'Accommodation not allocated' };
   }, { attrs: function (s) { return 'role="button" tabindex="0" data-id="' + s.id + '"'; }, active: function (s) { return s.id === selected; } });
   pager.innerHTML = pagerHtml(page, pages, shown.length, rows.length, 'students (' + total.toLocaleString() + ' records in total)');
 }
@@ -50,7 +50,7 @@ function showPanel(id) {
     '<div><div class="a-kv"><span>Department</span><span>' + esc(s.department) + '</span></div><div class="a-kv"><span>Level</span><span>' + esc(s.level) + '</span></div><div class="a-kv"><span>Email</span><span>' + esc(s.email) + '</span></div></div>' +
     '<h3>Current allocation</h3><div><div class="a-kv"><span>Hostel</span><span>' + (a ? esc(a.hostel) : 'Not allocated') + '</span></div><div class="a-kv"><span>Room / Bed</span><span>' + (a ? esc(a.room + ' / ' + a.bed) : '\u2014') + '</span></div><div class="a-kv"><span>Payment</span><span>' + pay + '</span></div></div>' +
     '<button class="a-btn a-btn-soft a-btn-block" id="profile">View full profile</button>';
-  panel.querySelector('h2').textContent = s.name; panel.querySelector('.a-caption').textContent = s.matric;
+  panel.querySelector('h2').textContent = s.first_name; panel.querySelector('.a-caption').textContent = s.matric_number;
   document.getElementById('profile').onclick = pendingFeature('Full profile');
   if (matchMedia('(max-width:1200px)').matches && id !== all[0].id) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
