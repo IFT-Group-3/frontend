@@ -11,6 +11,7 @@ const MOCK_URL = new URL('mock/admin/', document.currentScript.src).href;
 
 /* Always escape server values before putting them in innerHTML. */
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const aval = (value, fallback = '\u2014') => value === undefined || value === null || value === '' ? fallback : value;
 const naira = n => '\u20A6' + Number(n).toLocaleString('en-NG');
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const failure = (code, message) => ({ success: false, code, message });
@@ -105,9 +106,9 @@ const aicon = n => `<svg class="a-icon" viewBox="0 0 24 24" aria-hidden="true">$
 
 const ASTATUS = {
   active: ['success', 'check', 'Active'], paid: ['success', 'check', 'Paid'], allocated: ['success', 'check', 'Allocated'],
-  available: ['success', 'check', 'Available'], pending: ['warning', 'clock', 'Pending'], reserved: ['warning', 'clock', 'Reserved'],
+  available: ['success', 'check', 'Available'], unavailable: ['neutral', 'info', 'Unavailable'], pending: ['warning', 'clock', 'Pending'], reserved: ['warning', 'clock', 'Reserved'],
   maintenance: ['warning', 'clock', 'Maintenance'], failed: ['error', 'x', 'Failed'], cancelled: ['error', 'x', 'Cancelled'],
-  full: ['neutral', 'info', 'Full'], occupied: ['neutral', 'info', 'Occupied'], unallocated: ['neutral', 'info', 'Unallocated']
+  full: ['neutral', 'info', 'Full'], occupied: ['neutral', 'info', 'Occupied'], expired: ['error', 'x', 'Expired'], unallocated: ['neutral', 'info', 'Unallocated']
 };
 function abadge(status) {
   const s = ASTATUS[status];
@@ -154,7 +155,7 @@ function mountAdminShell({ active, title, subtitle = '', searchPlaceholder = 'Se
         <button class="a-iconbtn a-theme" aria-label="Switch theme" data-theme-toggle><span class="ic-moon">${aicon('moon')}</span><span class="ic-sun">${aicon('sun')}</span></button>
       </header>
     </div>`;
-  app.querySelector('.a-user strong').textContent = admin.name;
+  app.querySelector('.a-user strong').textContent = admin.email;
   app.querySelector('.a-user small').textContent = admin.role;
   app.querySelector('.a-titles h1').textContent = title;
   app.querySelector('.a-titles p').textContent = subtitle;
@@ -226,5 +227,5 @@ function downloadCsv(filename, header, rows) {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
-window.AdminKit = { ADMIN, esc, naira, wait, failure, fetchJson, adminApi, adminSession, aicon, abadge, aState, aToast, mountAdminShell, bindSearch, pendingFeature, tableHtml, pagerHtml, kpiHtml, summaryHtml, fillSelect, downloadCsv };
+window.AdminKit = { ADMIN, esc, aval, naira, wait, failure, fetchJson, adminApi, adminSession, aicon, abadge, aState, aToast, mountAdminShell, bindSearch, pendingFeature, tableHtml, pagerHtml, kpiHtml, summaryHtml, fillSelect, downloadCsv };
 })();

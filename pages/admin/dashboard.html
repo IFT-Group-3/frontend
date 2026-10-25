@@ -31,17 +31,17 @@
             <div class="features-grid admin-summary-grid">
                 <section class="card">
                     <p class="text-sm text-muted-foreground">Pending applications</p>
-                    <h2 class="admin-stat">128</h2>
+                    <h2 class="admin-stat" id="pending-applications">0</h2>
                     <p class="text-sm text-muted-foreground">Awaiting review</p>
                 </section>
                 <section class="card">
                     <p class="text-sm text-muted-foreground">Available rooms</p>
-                    <h2 class="admin-stat">342</h2>
+                    <h2 class="admin-stat" id="available-rooms">0</h2>
                     <p class="text-sm text-muted-foreground">Across all residences</p>
                 </section>
                 <section class="card">
                     <p class="text-sm text-muted-foreground">Confirmed allocations</p>
-                    <h2 class="admin-stat">876</h2>
+                    <h2 class="admin-stat" id="confirmed-allocations">0</h2>
                     <p class="text-sm text-muted-foreground">For the current intake</p>
                 </section>
             </div>
@@ -55,7 +55,7 @@
                 </div>
                 <div class="alert alert-success">
                     <i data-lucide="info" aria-hidden="true"></i>
-                    <span>Dashboard data is currently prototype content and will be connected to the administration API.</span>
+                    <span id="dashboard-status">Loading live dashboard data...</span>
                 </div>
             </section>
         </main>
@@ -64,13 +64,34 @@
     <div id="modal-placeholder"></div>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="../../js/app.js"></script>
+    <script src="../../js/admin.js"></script>
     <script>
+        const { adminApi, adminSession } = AdminKit;
+
         document.addEventListener('DOMContentLoaded', () => {
+            if (!adminSession.require()) return;
             loadComponent('admin-sidebar', 'admin-sidebar-placeholder');
             loadComponent('navbar', 'navbar-placeholder');
             loadComponent('footer', 'footer-placeholder');
             loadComponent('modal', 'modal-placeholder');
+            loadDashboard();
         });
+
+        async function loadDashboard() {
+            const response = await adminApi.dashboard();
+            const status = document.getElementById('dashboard-status');
+            if (!response.success) {
+                status.textContent = response.message || 'Unable to load dashboard data.';
+                return;
+            }
+
+            const summary = response.summary;
+            document.getElementById('pending-applications').textContent = summary.active_reservations;
+            document.getElementById('available-rooms').textContent = response.rooms
+                .filter(room => Number(room.available_beds) > 0).length;
+            document.getElementById('confirmed-allocations').textContent = summary.confirmed_allocations;
+            status.textContent = 'Dashboard data is connected to the administration API.';
+        }
     </script>
 </body>
 </html>
