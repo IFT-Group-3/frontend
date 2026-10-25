@@ -23,7 +23,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.`;
-const API_BASE_URL = 'https://hostel-system.iceiy.com';
+const API_BASE_URL = new URL('../../backend', document.currentScript.src).href.replace(/\/$/, '');
 
 const COMPONENT_FALLBACKS = {
     navbar: '<header class="main-header"><nav class="nav-container" aria-label="Main navigation"><a href="{{prefix}}index.html" class="main-logo">ROOMMATE</a><button class="nav-menu-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" onclick="toggleMobileNav()"><i data-lucide="menu" aria-hidden="true"></i></button><div class="nav-links" id="main-navigation"><a href="{{prefix}}index.html#features">Features</a><a href="{{prefix}}index.html#about">About</a><button class="btn-icon theme-toggle" type="button" onclick="toggleDarkMode()" aria-label="Switch to dark mode"><i data-lucide="sun" class="sun-icon"></i><i data-lucide="moon" class="moon-icon"></i></button><a href="{{prefix}}pages/auth/login.html" class="btn btn-secondary">Login</a></div></nav></header>',

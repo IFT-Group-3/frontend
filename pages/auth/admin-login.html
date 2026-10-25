@@ -106,6 +106,7 @@
             setBtnLoading(form.querySelector('button[type="submit"]'), true);
             try {
                 const user = await signIn(email.value, document.getElementById('admin-password').value);
+                sessionStorage.setItem('hostel_admin', JSON.stringify(user));
                 window.location.href = user.role === 'admin'
                     ? '../admin/dashboard.html'
                     : '../student/dashboard.html';

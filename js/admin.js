@@ -2,7 +2,11 @@
 (function () {
 /* Admin shared script: settings, escaping, network, session, icons, badges, shell.
    Set USE_MOCK to false when the PHP admin endpoints exist. Force failures in mock mode with ?mock=NETWORK. */
-const ADMIN = { USE_MOCK: true, API_BASE: '/api/admin/'   /* TODO: set to the PHP admin base URL agreed with the backend */, TIMEOUT_MS: 8000 };
+const ADMIN = {
+  USE_MOCK: false,
+  API_BASE: new URL('../../backend/api/', document.currentScript.src).href,
+  TIMEOUT_MS: 8000
+};
 const MOCK_URL = new URL('mock/admin/', document.currentScript.src).href;
 
 /* Always escape server values before putting them in innerHTML. */
@@ -15,7 +19,7 @@ async function fetchJson(url, options) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), ADMIN.TIMEOUT_MS);
   try {
-    const res = await fetch(url, { ...options, signal: ctrl.signal });
+    const res = await fetch(url, { ...options, credentials: 'include', signal: ctrl.signal });
     if (!res.ok) return failure('NETWORK', 'Could not reach the server. Try again.');
     return await res.json();
   } catch (e) {
@@ -38,16 +42,32 @@ const adminApi = {
       await wait(700);
       return { success: true, admin: { name: 'Dr. Tunde Adebayo', role: 'Hostel Administrator', email } };
     }
-    return fetchJson(ADMIN.API_BASE + 'login.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+    return fetchJson(ADMIN.API_BASE + 'auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
   },
-  dashboard: () => adminApi.get('dashboard.php', 'dashboard.json'),
-  students: () => adminApi.get('students.php', 'students.json'),
-  allocations: () => adminApi.get('allocations.php', 'allocations.json'),
-  payments: () => adminApi.get('payments.php', 'payments.json'),
-  hostels: () => adminApi.get('hostels.php', 'hostels.json'),
-  rooms: () => adminApi.get('rooms.php', 'rooms.json'),
+  dashboard: () => adminApi.get('admin/dashboard', 'dashboard.json'),
+  students: async () => adminApi.getCollection('students'),
+  allocations: async () => adminApi.getCollection('allocations'),
+  payments: async () => adminApi.getCollection('payments'),
+  hostels: async () => adminApi.getCollection('hostels'),
+  rooms: async () => adminApi.getCollection('rooms'),
+  async getCollection(collection) {
+    const dashboard = await adminApi.get('admin/dashboard', 'dashboard.json');
+    if (!dashboard.success) return dashboard;
+    return {
+      ...dashboard,
+      [collection]: dashboard[collection] || [],
+      total_records: dashboard.pagination?.totals?.[collection] || (dashboard[collection] || []).length
+    };
+  },
   async roomBeds(roomId) {
-    if (!ADMIN.USE_MOCK) return adminApi.get('room_beds.php', '', { room_id: roomId });
+    if (!ADMIN.USE_MOCK) {
+      const dashboard = await adminApi.get('admin/dashboard', 'dashboard.json');
+      if (!dashboard.success) return dashboard;
+      return {
+        success: true,
+        beds: (dashboard.beds || []).filter(bed => Number(bed.room_id) === Number(roomId))
+      };
+    }
     const res = await adminApi.get('', 'room-beds.json');
     if (!res.success) return res;
     return res.rooms[roomId] ? { success: true, beds: res.rooms[roomId] } : failure('NOT_FOUND', 'Room not found.');
