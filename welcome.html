@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" data-appearance="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome | ROOMMATE</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/student.css">
+
+    <script>
+        // Apply the saved theme before first paint to avoid a flash
+        (function () {
+            try {
+                var saved = localStorage.getItem('theme-preference');
+                if (saved) document.documentElement.setAttribute('data-appearance', saved);
+                else if (window.matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.setAttribute('data-appearance', 'dark');
+            } catch (e) {}
+        })();
+    </script>
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="nav-container">
+            <a href="index.html" class="main-logo">ROOMMATE</a>
+
+            <div class="header-actions">
+                <button class="btn-icon theme-toggle" type="button" onclick="toggleDarkMode()" aria-label="Switch to dark mode">
+                    <i data-lucide="moon" class="moon-icon" aria-hidden="true"></i>
+                    <i data-lucide="sun" class="sun-icon" aria-hidden="true"></i>
+                </button>
+
+                <div class="user-chip">
+                    <span class="avatar avatar-sm" id="user-initials" aria-hidden="true">S</span>
+                    <span class="user-chip-name" id="header-name"></span>
+                </div>
+
+                <button class="btn btn-secondary" id="logout-btn" type="button">
+                    <i data-lucide="log-out" aria-hidden="true"></i>
+                    <span class="btn-label">Log out</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="welcome-main">
+
+        <section class="hero" aria-labelledby="greeting">
+            <span class="avatar" id="hero-initials" aria-hidden="true">S</span>
+            <div class="hero-text">
+                <h1 id="greeting">Welcome</h1>
+                <p>You're signed in to the University of Ibadan hostel allocation portal. Room browsing and booking are coming next.</p>
+                <div class="chips">
+                    <span class="chip"><i data-lucide="mail" aria-hidden="true"></i><span id="user-email"></span></span>
+                    <span class="chip"><i data-lucide="graduation-cap" aria-hidden="true"></i><span id="user-role">Student</span></span>
+                    <span class="chip" id="matric-chip" hidden><i data-lucide="id-card" aria-hidden="true"></i><span id="user-matric"></span></span>
+                </div>
+            </div>
+        </section>
+
+        <section aria-labelledby="journey-title">
+            <div class="section-head">
+                <h2 id="journey-title">Your allocation journey</h2>
+                <p>Here's what's ahead</p>
+            </div>
+
+            <div class="steps-grid">
+                <article class="step-card is-done">
+                    <div class="step-top">
+                        <span class="step-icon"><i data-lucide="log-in" aria-hidden="true"></i></span>
+                        <span class="status status-done">Done</span>
+                    </div>
+                    <h3>Sign in</h3>
+                    <p>You're verified with your university email.</p>
+                </article>
+
+                <article class="step-card is-next">
+                    <div class="step-top">
+                        <span class="step-icon"><i data-lucide="building" aria-hidden="true"></i></span>
+                        <span class="status status-next">Up next</span>
+                    </div>
+                    <h3>Browse hostels</h3>
+                    <p>View buildings, rooms, capacity and vacant beds.</p>
+                </article>
+
+                <article class="step-card">
+                    <div class="step-top">
+                        <span class="step-icon"><i data-lucide="bed-double" aria-hidden="true"></i></span>
+                        <span class="status status-soon">Coming soon</span>
+                    </div>
+                    <h3>Select a bed &amp; pay</h3>
+                    <p>Reserve your bed and settle the accommodation invoice.</p>
+                </article>
+
+                <article class="step-card">
+                    <div class="step-top">
+                        <span class="step-icon"><i data-lucide="receipt" aria-hidden="true"></i></span>
+                        <span class="status status-soon">Coming soon</span>
+                    </div>
+                    <h3>Get your receipt</h3>
+                    <p>Download your electronic receipt once payment clears.</p>
+                </article>
+            </div>
+        </section>
+
+        <p class="page-note">This is a temporary welcome page for the authentication slice.</p>
+    </main>
+
+    <div id="modal-placeholder"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/app.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/welcome.js"></script>
+</body>
+</html>
