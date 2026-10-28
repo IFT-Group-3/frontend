@@ -123,7 +123,7 @@ const AICONS = {
 const aicon = n => `<svg class="a-icon" viewBox="0 0 24 24" aria-hidden="true">${AICONS[n] || ''}</svg>`;
 
 const ASTATUS = {
-  active: ['success', 'check', 'Active'], paid: ['success', 'check', 'Paid'], allocated: ['success', 'check', 'Allocated'],
+  active: ['success', 'check', 'Active'], confirmed: ['success', 'check', 'Confirmed'], paid: ['success', 'check', 'Paid'], allocated: ['success', 'check', 'Allocated'],
   available: ['success', 'check', 'Available'], unavailable: ['neutral', 'info', 'Unavailable'], pending: ['warning', 'clock', 'Pending'], reserved: ['warning', 'clock', 'Reserved'],
   maintenance: ['warning', 'clock', 'Maintenance'], failed: ['error', 'x', 'Failed'], cancelled: ['error', 'x', 'Cancelled'],
   full: ['neutral', 'info', 'Full'], occupied: ['neutral', 'info', 'Occupied'], expired: ['error', 'x', 'Expired'], unallocated: ['neutral', 'info', 'Unallocated']
