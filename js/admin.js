@@ -4,7 +4,7 @@
    Set USE_MOCK to false when the PHP admin endpoints exist. Force failures in mock mode with ?mock=NETWORK. */
 const ADMIN = {
   USE_MOCK: false,
-  API_BASE: new URL('../../backend/api/', document.currentScript.src).href,
+  API_BASE: (['localhost', '127.0.0.1'].includes(location.hostname) ? 'http://localhost/hostel-backend' : location.origin) + '/api/',
   TIMEOUT_MS: 8000
 };
 const MOCK_URL = new URL('mock/admin/', document.currentScript.src).href;
