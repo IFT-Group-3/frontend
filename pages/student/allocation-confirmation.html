@@ -52,7 +52,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const card = document.getElementById('confirm-card');
             const heading = document.querySelector('.page-header h1');
-            const allocation = Student.loadJson(Student.ALLOCATION_KEY);
+            let allocation = Student.loadJson(Student.ALLOCATION_KEY);
             // Paystack sends the student back with ?reference=... after paying
             const returnedReference = Student.param('reference') || Student.param('trxref') || sessionStorage.getItem(Student.REFERENCE_KEY);
             let timer = null;
@@ -124,7 +124,7 @@
                 actions.appendChild(check);
                 card.appendChild(actions);
 
-                const expiresAt = (allocation.reserved_at || Date.now()) + (allocation.expires_in_minutes || 30) * 60000;
+                const expiresAt = allocation.expires_at_ms || ((allocation.reserved_at || Date.now()) + (allocation.expires_in_minutes || 30) * 60000);
                 function tick() {
                     const left = expiresAt - Date.now();
                     if (left <= 0) {
@@ -170,6 +170,24 @@
                 if (returnedReference) {
                     card.replaceChildren(Student.el('p', 'text-muted-foreground', 'Checking your payment...'));
                     if (await verify(returnedReference)) return;
+                }
+                // The server knows what this student really holds, even after a refresh or a new tab.
+                const mine = await Student.call('/api/allocations/mine');
+                if (mine.ok) {
+                    const current = mine.data.allocation;
+                    if (!current) {
+                        Student.removeKey(Student.ALLOCATION_KEY);
+                        allocation = null;
+                    } else if (current.status === 'Confirmed') {
+                        showConfirmed(current);
+                        return;
+                    } else {
+                        allocation = Object.assign({}, current, { expires_at_ms: Date.now() + current.seconds_left * 1000 });
+                        Student.saveJson(Student.ALLOCATION_KEY, allocation);
+                        if (mine.data.payment && mine.data.payment.status === 'Pending') {
+                            sessionStorage.setItem(Student.REFERENCE_KEY, mine.data.payment.reference);
+                        }
+                    }
                 }
                 if (allocation) {
                     showReservation();

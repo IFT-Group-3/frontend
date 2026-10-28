@@ -154,7 +154,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Load shared components
             loadComponent('sidebar', 'sidebar-placeholder');
-            loadComponent('navbar', 'navbar-placeholder');
+            loadComponent('navbar', 'navbar-placeholder', function () {
+                document.querySelectorAll('#navbar-placeholder a[href$="auth/login.html"]').forEach(function (link) { link.remove(); });
+            });
             loadComponent('footer', 'footer-placeholder');
             loadComponent('modal', 'modal-placeholder');
         });

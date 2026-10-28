@@ -68,11 +68,16 @@
         container.appendChild(box);
     }
 
+    /** Students are already signed in, so the public "Login" button in the top bar is removed. */
+    function removeLoginButton() {
+        document.querySelectorAll('#navbar-placeholder a[href$="auth/login.html"]').forEach(link => link.remove());
+    }
+
     /** Load the shared layout pieces and icons. */
     function init() {
         document.addEventListener('DOMContentLoaded', () => {
             loadComponent('sidebar', 'sidebar-placeholder');
-            loadComponent('navbar', 'navbar-placeholder');
+            loadComponent('navbar', 'navbar-placeholder', removeLoginButton);
             loadComponent('footer', 'footer-placeholder');
             loadComponent('modal', 'modal-placeholder');
             if (window.lucide) window.lucide.createIcons();
@@ -91,6 +96,7 @@
         removeKey: removeKey,
         call: call,
         showMessage: showMessage,
-        init: init
+        init: init,
+        removeLoginButton: removeLoginButton
     };
 })();

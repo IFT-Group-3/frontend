@@ -69,6 +69,22 @@
             }
 
             const rooms = result.data.rooms || [];
+
+            // A student can hold only one bed. Tell them if they already do.
+            let holding = false;
+            const mine = await Student.call('/api/allocations/mine');
+            if (mine.ok && mine.data.allocation) {
+                holding = true;
+                const current = mine.data.allocation;
+                const banner = Student.el('div', 'card mb-6');
+                banner.appendChild(Student.el('h3', '', current.status === 'Confirmed' ? 'You already have a bed' : 'You are holding a bed'));
+                banner.appendChild(Student.el('p', '', current.hostel_name + ', room ' + current.room_number + ', bed ' + current.bed_number + '. ' +
+                    (current.status === 'Confirmed' ? 'Your payment is confirmed.' : 'Finish paying before the hold runs out.')));
+                const open = Student.el('a', 'btn btn-primary mt-4', current.status === 'Confirmed' ? 'View my bed' : 'Continue to payment');
+                open.href = 'allocation-confirmation.html';
+                banner.appendChild(open);
+                document.getElementById('period-note').before(banner);
+            }
             const period = result.data.allocation_period;
             if (period) note.textContent = 'Stay period: ' + Student.formatDate(period.start_date) + ' to ' + Student.formatDate(period.end_date);
 
@@ -130,6 +146,7 @@
 
                     const button = Student.el('button', 'btn btn-primary mt-4 w-full', 'Reserve this room');
                     button.type = 'button';
+                    button.disabled = holding;
                     button.addEventListener('click', () => reserve(room, button));
                     card.appendChild(button);
 
