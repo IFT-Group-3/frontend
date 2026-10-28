@@ -52,7 +52,7 @@
             <span class="avatar" id="hero-initials" aria-hidden="true">S</span>
             <div class="hero-text">
                 <h1 id="greeting">Welcome</h1>
-                <p>You're signed in to the University of Ibadan hostel allocation portal. Room browsing and booking are coming next.</p>
+                <p>You're signed in to the University of Ibadan hostel allocation portal. You can now browse hostels, pick a room and pay for your bed.</p>
                 <div class="chips">
                     <span class="chip"><i data-lucide="mail" aria-hidden="true"></i><span id="user-email"></span></span>
                     <span class="chip"><i data-lucide="graduation-cap" aria-hidden="true"></i><span id="user-role">Student</span></span>
@@ -74,26 +74,26 @@
                         <span class="status status-done">Done</span>
                     </div>
                     <h3>Sign in</h3>
-                    <p>You're verified with your university email.</p>
+                    <p>You're signed in to your account.</p>
                 </article>
 
-                <article class="step-card is-next">
+                <a class="step-card is-next" href="pages/student/hostels.html" style="text-decoration:none;color:inherit;">
                     <div class="step-top">
                         <span class="step-icon"><i data-lucide="building" aria-hidden="true"></i></span>
                         <span class="status status-next">Up next</span>
                     </div>
                     <h3>Browse hostels</h3>
                     <p>View buildings, rooms, capacity and vacant beds.</p>
-                </article>
+                </a>
 
-                <article class="step-card">
+                <a class="step-card" href="pages/student/room-selection.html" style="text-decoration:none;color:inherit;">
                     <div class="step-top">
                         <span class="step-icon"><i data-lucide="bed-double" aria-hidden="true"></i></span>
-                        <span class="status status-soon">Coming soon</span>
+                        <span class="status status-next">Next</span>
                     </div>
                     <h3>Select a bed &amp; pay</h3>
                     <p>Reserve your bed and settle the accommodation invoice.</p>
-                </article>
+                </a>
 
                 <article class="step-card">
                     <div class="step-top">
@@ -106,7 +106,7 @@
             </div>
         </section>
 
-        <p class="page-note">This is a temporary welcome page for the authentication slice.</p>
+        <p class="page-note"><a href="pages/student/hostels.html" class="btn btn-primary">Start browsing hostels</a></p>
     </main>
 
     <div id="modal-placeholder"></div>

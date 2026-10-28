@@ -1,7 +1,7 @@
 /**
  * ROOMMATE - Auth helpers (shared by the login and welcome pages)
  *
- * Backend contract (api/auth/login.php) - JSON in, JSON out:
+ * Backend contract (POST /api/auth/login) - JSON in, JSON out:
  *   Request  POST { "email": "...", "password": "..." }
  *   Success  200  { "success": true,  "message": "Login successful",
  *                   "user": { "id": 1, "name": "Ada Obi", "email": "...",
@@ -10,16 +10,16 @@
  *
  * api/auth/logout.php: POST, destroys the PHP session, returns { "success": true }.
  *
- * While the PHP endpoints are not ready, USE_MOCK = true lets the frontend be
- * tested on its own. Set it to false once the backend is in.
+ * Needs js/api.js loaded first. Set USE_MOCK = true to test without a backend.
  */
 (function () {
     const CONFIG = {
-        USE_MOCK: true,
+        USE_MOCK: false,
         MOCK_PASSWORD: 'password123',
-        LOGIN_URL: '../../api/auth/login.php',
-        LOGOUT_URL: '../../api/auth/logout.php',
+        LOGIN_PATH: '/api/auth/login',
+        LOGOUT_PATH: '/api/auth/logout',
         WELCOME_PAGE: '../../welcome.html',
+        ADMIN_PAGE: '../admin/dashboard.html',
         LOGIN_PAGE: 'pages/auth/login.html',
         STORAGE_KEY: 'roommate-user'
     };
@@ -71,18 +71,11 @@
         if (CONFIG.USE_MOCK) return mockLogin(email, password);
 
         try {
-            const response = await fetch(CONFIG.LOGIN_URL, {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body: JSON.stringify({ email: email, password: password })
-            });
+            const result = await Api.post(CONFIG.LOGIN_PATH, { email: email, password: password });
+            const data = result.data;
 
-            let data = null;
-            try { data = await response.json(); } catch (e) { /* non-JSON response */ }
-
-            if (!response.ok || !data || !data.success) {
-                return { success: false, message: (data && data.message) || 'Login failed. Please try again.' };
+            if (!result.ok || !data.success) {
+                return { success: false, message: data.message || 'Login failed. Please try again.' };
             }
             if (!data.user) data.user = { name: nameFromEmail(email), email: email, role: 'student' };
             return data;
@@ -96,11 +89,7 @@
     async function logout() {
         if (!CONFIG.USE_MOCK) {
             try {
-                await fetch(CONFIG.LOGOUT_URL, {
-                    method: 'POST',
-                    credentials: 'same-origin',
-                    headers: { 'Accept': 'application/json' }
-                });
+                await Api.post(CONFIG.LOGOUT_PATH);
             } catch (error) {
                 console.error(error);
             }

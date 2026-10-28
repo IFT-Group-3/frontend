@@ -1,97 +1,48 @@
 <!DOCTYPE html>
-<html lang="en-GB">
-<head>
-    <title>Admin Overview | ROOMMATE</title>
-    <script>
-        (function () {
-            try {
-                var savedTheme = localStorage.getItem('theme-preference');
-                var preferredTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-                document.documentElement.setAttribute('data-appearance', preferredTheme);
-            } catch (error) {}
-        }());
-    </script>
-    <link rel="stylesheet" href="../../css/global.css" />
-    <link rel="stylesheet" href="../../css/components.css" />
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-</head>
-<body class="dashboard-layout">
-    <div id="admin-sidebar-placeholder"></div>
-    <div class="main-content">
-        <div id="navbar-placeholder"></div>
-        <main class="content-padding">
-            <header class="page-header">
-                <div>
-                    <p class="text-sm text-muted-foreground tracking-wide">ADMINISTRATION</p>
-                    <h1>Good morning, Administrator.</h1>
-                </div>
-                <span class="badge badge-secondary">STAFF PORTAL</span>
-            </header>
-            <div class="features-grid admin-summary-grid">
-                <section class="card">
-                    <p class="text-sm text-muted-foreground">Pending applications</p>
-                    <h2 class="admin-stat" id="pending-applications">0</h2>
-                    <p class="text-sm text-muted-foreground">Awaiting review</p>
-                </section>
-                <section class="card">
-                    <p class="text-sm text-muted-foreground">Available rooms</p>
-                    <h2 class="admin-stat" id="available-rooms">0</h2>
-                    <p class="text-sm text-muted-foreground">Across all residences</p>
-                </section>
-                <section class="card">
-                    <p class="text-sm text-muted-foreground">Confirmed allocations</p>
-                    <h2 class="admin-stat" id="confirmed-allocations">0</h2>
-                    <p class="text-sm text-muted-foreground">For the current intake</p>
-                </section>
-            </div>
-            <section class="card admin-notice-card">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h3>Administrative workspace</h3>
-                        <p>Use the navigation to manage students, residences, rooms, allocations, and payments.</p>
-                    </div>
-                    <i data-lucide="shield-check" aria-hidden="true"></i>
-                </div>
-                <div class="alert alert-success">
-                    <i data-lucide="info" aria-hidden="true"></i>
-                    <span id="dashboard-status">Loading live dashboard data...</span>
-                </div>
-            </section>
-        </main>
-        <div id="footer-placeholder"></div>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<script>(function(){try{var t=localStorage.getItem('theme-preference')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-appearance',t)}catch(e){}}());</script>
+<link rel="stylesheet" href="../../css/global.css"><link rel="stylesheet" href="../../css/admin.css"><title>Admin Overview | ROOMMATE</title></head>
+<body class="a-body">
+<main id="content">
+  <div id="kpis"></div>
+  <div class="a-card" style="padding:16px;margin-top:16px" id="period-card"></div>
+  <div class="a-card" style="padding:16px;margin-top:16px">
+    <h2>Quick actions</h2>
+    <p class="a-muted" style="font-size:13px">Set up the system in this order before students start booking.</p>
+    <div class="a-panel" style="margin-top:12px">
+      <a class="a-btn a-btn-soft a-btn-block" href="hostels.html">1. Add a hostel</a>
+      <a class="a-btn a-btn-soft a-btn-block" href="rooms.html">2. Add rooms to it</a>
+      <a class="a-btn a-btn-soft a-btn-block" href="allocations.html">3. Set the allocation period</a>
     </div>
-    <div id="modal-placeholder"></div>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="../../js/app.js"></script>
-    <script src="../../js/admin.js"></script>
-    <script>
-        const { adminApi, adminSession } = AdminKit;
+  </div>
+</main>
+<script src="../../js/admin.js"></script>
+<script>
+const { esc, naira, adminApi, aState, kpiHtml, mountAdminShell } = AdminKit;
+mountAdminShell({ active: 'dashboard', title: 'Overview', subtitle: 'A live summary of hostels, beds, bookings and payments.', searchPlaceholder: 'Search' });
+var kpis = document.getElementById('kpis'), periodCard = document.getElementById('period-card');
 
-        document.addEventListener('DOMContentLoaded', () => {
-            if (!adminSession.require()) return;
-            loadComponent('admin-sidebar', 'admin-sidebar-placeholder');
-            loadComponent('navbar', 'navbar-placeholder');
-            loadComponent('footer', 'footer-placeholder');
-            loadComponent('modal', 'modal-placeholder');
-            loadDashboard();
-        });
+async function load() {
+  aState(kpis, 'loading', 'Loading dashboard...');
+  var res = await adminApi.dashboard();
+  if (!res.success) { aState(kpis, 'error', res.message || 'Could not load the dashboard.', load); periodCard.hidden = true; return; }
+  var s = res.summary || {};
+  var freeBeds = (res.rooms || []).reduce(function (sum, r) { return sum + Number(r.available_beds || 0); }, 0);
+  kpis.innerHTML = kpiHtml([
+    { label: 'Students', value: s.students || 0, note: 'Registered accounts' },
+    { label: 'Hostels', value: s.hostels || 0, note: (s.rooms || 0) + ' rooms' },
+    { label: 'Beds free', value: freeBeds, note: 'Out of ' + (s.bed_spaces || 0) + ' beds' },
+    { label: 'Waiting to pay', value: s.active_reservations || 0, note: 'Reserved, 30 minute hold' },
+    { label: 'Confirmed', value: s.confirmed_allocations || 0, note: 'Paid and allocated' },
+    { label: 'Money collected', value: naira(s.total_paid_ngn || 0), note: (s.paid_payments || 0) + ' paid payments' }
+  ]);
 
-        async function loadDashboard() {
-            const response = await adminApi.dashboard();
-            const status = document.getElementById('dashboard-status');
-            if (!response.success) {
-                status.textContent = response.message || 'Unable to load dashboard data.';
-                return;
-            }
-
-            const summary = response.summary;
-            document.getElementById('pending-applications').textContent = summary.active_reservations;
-            document.getElementById('available-rooms').textContent = response.rooms
-                .filter(room => Number(room.available_beds) > 0).length;
-            document.getElementById('confirmed-allocations').textContent = summary.confirmed_allocations;
-            status.textContent = 'Dashboard data is connected to the administration API.';
-        }
-    </script>
-</body>
-</html>
+  var p = res.allocation_period;
+  periodCard.hidden = false;
+  periodCard.innerHTML = '<h2>Allocation period</h2><p class="a-muted" style="font-size:13px" id="period-text"></p><a class="a-btn a-btn-soft" style="margin-top:12px" href="allocations.html">Change period</a>';
+  document.getElementById('period-text').textContent = p
+    ? 'Students can book beds from ' + p.start_date + ' to ' + p.end_date + '.'
+    : 'No period is set yet, so students cannot book rooms. Set one on the Allocations page.';
+}
+load();
+</script></body></html>

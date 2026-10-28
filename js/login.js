@@ -1,14 +1,28 @@
 /**
  * ROOMMATE - Student login page logic
- * Depends on: app.js (toast, validators, loadComponent) and auth.js
+ * Depends on: app.js (toast, loadComponent), api.js and auth.js
  */
+function destinationFor(user) {
+    return user && user.role === 'admin' ? Auth.config.ADMIN_PAGE : Auth.config.WELCOME_PAGE;
+}
+
+// The server decides who may sign in, so here we only check the email looks valid.
+function validateEmailField(input, messageElement) {
+    const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value.trim());
+    input.classList.toggle('is-invalid', !valid);
+    messageElement.textContent = valid ? '' : 'Enter a valid email address.';
+    messageElement.hidden = valid;
+    return valid;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     if (window.lucide) window.lucide.createIcons();
     loadComponent('navbar', 'navbar-placeholder');
 
     // Already signed in? Skip the form.
-    if (Auth.getUser()) {
-        window.location.replace(Auth.config.WELCOME_PAGE);
+    const existingUser = Auth.getUser();
+    if (existingUser) {
+        window.location.replace(destinationFor(existingUser));
         return;
     }
 
@@ -44,11 +58,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Live validation once the student has tried to submit or left the field
     emailInput.addEventListener('blur', () => {
-        if (emailInput.value.trim()) validateUniversityEmail(emailInput, emailError);
+        if (emailInput.value.trim()) validateEmailField(emailInput, emailError);
     });
     emailInput.addEventListener('input', () => {
         clearFormError();
-        if (submitted) validateUniversityEmail(emailInput, emailError);
+        if (submitted) validateEmailField(emailInput, emailError);
     });
     passwordInput.addEventListener('input', () => {
         clearFormError();
@@ -60,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const show = passwordInput.type === 'password';
         passwordInput.type = show ? 'text' : 'password';
         togglePass.classList.toggle('is-visible', show);
+        togglePass.textContent = show ? 'Hide' : 'Show';
         togglePass.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
         togglePass.setAttribute('aria-pressed', String(show));
     });
@@ -69,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         submitted = true;
         clearFormError();
 
-        const emailOk = validateUniversityEmail(emailInput, emailError);
+        const emailOk = validateEmailField(emailInput, emailError);
         const passwordOk = validatePassword();
         if (!emailOk) { emailInput.focus(); return; }
         if (!passwordOk) { passwordInput.focus(); return; }
@@ -82,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (result.success) {
             Auth.saveUser(result.user);
             showToast('Welcome back! Redirecting...');
-            setTimeout(() => window.location.assign(Auth.config.WELCOME_PAGE), 700);
+            setTimeout(() => window.location.assign(destinationFor(result.user)), 700);
             return; // keep the button in its loading state while redirecting
         }
 

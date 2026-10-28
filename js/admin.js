@@ -145,8 +145,7 @@ function aToast(msg) {
 }
 
 const ADMIN_NAV = [['dashboard', 'Dashboard', 'dashboard.html'], ['hostels', 'Hostels', 'hostels.html'], ['rooms', 'Rooms & Beds', 'rooms.html'],
-  ['students', 'Students', 'students.html'], ['allocations', 'Allocations', 'allocations.html'], ['payments', 'Payments', 'payments.html'],
-  ['reports', 'Reports', '#'], ['settings', 'Settings', '#']];
+  ['students', 'Students', 'students.html'], ['allocations', 'Allocations', 'allocations.html'], ['payments', 'Payments', 'payments.html']];
 
 /* Wraps <main id="content"> with the sidebar (a drawer on mobile) and the top bar. */
 function mountAdminShell({ active, title, subtitle = '', searchPlaceholder = 'Search records' }) {
@@ -190,7 +189,10 @@ function mountAdminShell({ active, title, subtitle = '', searchPlaceholder = 'Se
     document.documentElement.setAttribute('data-appearance', next);
     try { localStorage.setItem('theme-preference', next); } catch (e) {}   /* same key the public pages use */
   });
-  app.querySelector('[data-logout]').addEventListener('click', () => { adminSession.clear(); location.href = '../auth/admin-login.html'; });
+  app.querySelector('[data-logout]').addEventListener('click', async () => {
+    await fetchJson(apiUrl('/api/auth/logout'), { method: 'POST' });   /* end the PHP session too */
+    adminSession.clear(); location.href = '../auth/admin-login.html';
+  });
   return admin;
 }
 
@@ -245,5 +247,95 @@ function downloadCsv(filename, header, rows) {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
-window.AdminKit = { ADMIN, esc, aval, naira, wait, failure, fetchJson, adminApi, adminSession, aicon, abadge, aState, aToast, mountAdminShell, bindSearch, pendingFeature, tableHtml, pagerHtml, kpiHtml, summaryHtml, fillSelect, downloadCsv };
+
+/* A small form dialog.
+   fields: [{ name, label, type, required, options:[{value,label}], placeholder, value, min, max, step, accept, hint }]
+   onSubmit(formElement) must return a promise of { success, message }. On success the dialog closes and onDone() runs. */
+function aForm({ title, intro = '', fields, submitLabel = 'Save', onSubmit, onDone }) {
+  const scrim = document.createElement('div');
+  scrim.className = 'a-modal-scrim';
+  scrim.innerHTML = '<div class="a-modal" role="dialog" aria-modal="true" aria-labelledby="a-modal-title"><h2 id="a-modal-title"></h2><p class="a-muted a-intro"></p><form novalidate></form></div>';
+  scrim.querySelector('h2').textContent = title;
+  const introEl = scrim.querySelector('.a-intro');
+  introEl.textContent = intro;
+  introEl.hidden = !intro;
+  const form = scrim.querySelector('form');
+
+  fields.forEach(f => {
+    const wrap = document.createElement('label');
+    wrap.className = 'a-field';
+    const label = document.createElement('span');
+    label.textContent = f.label + (f.required ? ' *' : '');
+    wrap.appendChild(label);
+    let input;
+    if (f.type === 'select') {
+      input = document.createElement('select');
+      (f.options || []).forEach(o => {
+        const opt = document.createElement('option');
+        opt.value = o.value; opt.textContent = o.label;
+        input.appendChild(opt);
+      });
+    } else if (f.type === 'textarea') {
+      input = document.createElement('textarea');
+      input.rows = 3;
+    } else {
+      input = document.createElement('input');
+      input.type = f.type || 'text';
+    }
+    input.className = 'a-input';
+    input.name = f.name;
+    if (f.required) input.required = true;
+    ['placeholder', 'min', 'max', 'step', 'accept'].forEach(k => { if (f[k] !== undefined) input.setAttribute(k, f[k]); });
+    if (f.value !== undefined && f.type !== 'file') input.value = f.value;
+    wrap.appendChild(input);
+    if (f.hint) {
+      const hint = document.createElement('small');
+      hint.className = 'a-muted'; hint.textContent = f.hint;
+      wrap.appendChild(hint);
+    }
+    form.appendChild(wrap);
+  });
+
+  const error = document.createElement('p');
+  error.className = 'a-form-error'; error.setAttribute('role', 'alert'); error.hidden = true;
+  const actions = document.createElement('div');
+  actions.className = 'a-modal-actions';
+  const cancel = document.createElement('button');
+  cancel.type = 'button'; cancel.className = 'a-btn a-btn-ghost'; cancel.textContent = 'Cancel';
+  const submit = document.createElement('button');
+  submit.type = 'submit'; submit.className = 'a-btn a-btn-primary'; submit.textContent = submitLabel;
+  actions.append(cancel, submit);
+  form.append(error, actions);
+
+  const opener = document.activeElement;
+  const close = () => { scrim.remove(); document.removeEventListener('keydown', onKey); if (opener && opener.focus) opener.focus(); };
+  const onKey = e => { if (e.key === 'Escape') close(); };
+  document.addEventListener('keydown', onKey);
+  cancel.addEventListener('click', close);
+  scrim.addEventListener('mousedown', e => { if (e.target === scrim) close(); });
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    error.hidden = true;
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+    submit.disabled = true; submit.textContent = 'Saving...';
+    let res;
+    try { res = await onSubmit(form); } catch (err) { res = failure('NETWORK', 'Something went wrong. Try again.'); }
+    submit.disabled = false; submit.textContent = submitLabel;
+    if (!res || !res.success) {
+      error.textContent = (res && res.message) || 'Could not save. Try again.';
+      error.hidden = false;
+      return;
+    }
+    close();
+    aToast(res.message || 'Saved.');
+    if (onDone) onDone(res);
+  });
+
+  document.body.appendChild(scrim);
+  const first = form.querySelector('input, select, textarea');
+  if (first) first.focus();
+}
+
+window.AdminKit = { aForm, ADMIN, esc, aval, naira, wait, failure, fetchJson, adminApi, adminSession, aicon, abadge, aState, aToast, mountAdminShell, bindSearch, pendingFeature, tableHtml, pagerHtml, kpiHtml, summaryHtml, fillSelect, downloadCsv };
 })();

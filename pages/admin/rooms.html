@@ -9,6 +9,7 @@
     <select class="a-input" id="f-hostel" aria-label="Filter by hostel"><option value="">All hostels</option></select>
     <select class="a-input" id="f-block" aria-label="Filter by block"><option value="">All blocks</option></select>
     <select class="a-input" id="f-avail" aria-label="Filter by availability"><option value="">All availability</option><option value="available">Available</option><option value="full">Full</option><option value="reserved">Reserved</option></select>
+    <button class="a-btn a-btn-primary" id="add-room">+ Add Room</button>
   </div>
   <div class="a-card" style="padding:16px">
     <h2>Rooms</h2>
@@ -25,11 +26,11 @@
 </main>
 <script src="../../js/admin.js"></script>
 <script>
-const { ADMIN, esc, aval, naira, wait, failure, fetchJson, adminApi, adminSession, aicon, abadge, aState, aToast, mountAdminShell, bindSearch, pendingFeature, tableHtml, pagerHtml, kpiHtml, summaryHtml, fillSelect, downloadCsv } = AdminKit;
+const { aForm, ADMIN, esc, aval, naira, wait, failure, fetchJson, adminApi, adminSession, aicon, abadge, aState, aToast, mountAdminShell, bindSearch, pendingFeature, tableHtml, pagerHtml, kpiHtml, summaryHtml, fillSelect, downloadCsv } = AdminKit;
 mountAdminShell({ active: 'rooms', title: 'Rooms & Beds', subtitle: 'Live room capacity and individual bed status.', searchPlaceholder: 'Search rooms' });
 document.getElementById('find-icon').innerHTML = aicon('search');
 var list = document.getElementById('list'), bedsList = document.getElementById('beds-list'), pager = document.getElementById('pager'), panel = document.getElementById('panel');
-var all = [], allBeds = [], q = '', fh = '', fb = '', fa = '', selected = null, reqId = 0, page = 1, PER = 10;
+var all = [], allBeds = [], hostelList = [], q = '', fh = '', fb = '', fa = '', selected = null, reqId = 0, page = 1, PER = 10;
 
 function roomStatus(r) { return Number(aval(r.available_beds, 0)) > 0 ? 'available' : 'full'; }
 function view() {
@@ -38,19 +39,19 @@ function view() {
   });
 }
 var BED_COLS = [
-  { label: 'bed_id', cell: function (b) { return esc(aval(b.bed_id)); } },
-  { label: 'room_id', cell: function (b) { return esc(aval(b.room_id)); } },
-  { label: 'bed_number', cell: function (b) { return esc(aval(b.bed_number)); } }
+  { label: 'Bed', cell: function (b) { return '<strong>' + esc(aval(b.bed_number)) + '</strong>'; } },
+  { label: 'Hostel', cell: function (b) { return esc(aval(b.hostel_name)); } },
+  { label: 'Room', cell: function (b) { return esc(aval(b.room_number)); } },
+  { label: 'Status', cell: function (b) { return abadge(String(aval(b.status, 'available')).toLowerCase()); } }
 ];
 var ROOM_COLS = [
-  { label: 'room_id', cell: function (r) { return esc(aval(r.room_id)); } },
-  { label: 'hostel_id', cell: function (r) { return esc(aval(r.hostel_id)); } },
-  { label: 'building_code', cell: function (r) { return esc(aval(r.building_code)); } },
-  { label: 'floor_number', cell: function (r) { return esc(aval(r.floor_number)); } },
-  { label: 'room_number', cell: function (r) { return esc(aval(r.room_number)); } },
-  { label: 'max_occupants', cell: function (r) { return esc(aval(r.max_occupants)); } },
-  { label: 'price_per_occupant', cell: function (r) { return esc(aval(r.price_per_occupant)); } },
-  { label: 'status', cell: function (r) { return esc(aval(r.status)); } }
+  { label: 'Hostel', cell: function (r) { return esc(aval(r.hostel_name)); } },
+  { label: 'Block', cell: function (r) { return esc(aval(r.building_code)); } },
+  { label: 'Floor', cell: function (r) { return esc(aval(r.floor_number)); } },
+  { label: 'Room', cell: function (r) { return '<strong>' + esc(aval(r.room_number)) + '</strong>'; } },
+  { label: 'Beds free', cell: function (r) { return esc(aval(r.available_beds, 0) + ' / ' + aval(r.max_occupants)); } },
+  { label: 'Price per bed', cell: function (r) { return naira(aval(r.price_per_occupant, 0)); } },
+  { label: 'Status', cell: function (r) { return abadge(String(aval(r.status, 'unavailable')).toLowerCase()); } }
 ];
 function fill(id, values) {
   var sel = document.getElementById(id), first = sel.options[0].outerHTML;
@@ -63,8 +64,8 @@ function render() {
   var shown = rows.slice((page - 1) * PER, page * PER);
   if (!shown.length) aState(list, 'empty', 'No rooms match your filters.');
   else {
-    list.innerHTML = tableHtml(ROOM_COLS, '1fr 1fr 1.2fr 1fr 1.2fr 1.2fr 1.5fr 1fr', shown, function (r) {
-      return { name: 'Room ' + aval(r.room_number), badge: abadge(String(aval(r.status, 'unavailable')).toLowerCase()), meta: 'room_id: ' + aval(r.room_id) + ' \u00B7 hostel_id: ' + aval(r.hostel_id), meta2: 'building_code: ' + aval(r.building_code) + ' \u00B7 floor_number: ' + aval(r.floor_number) };
+    list.innerHTML = tableHtml(ROOM_COLS, '1.6fr .8fr .8fr 1fr 1fr 1.2fr 1fr', shown, function (r) {
+      return { name: 'Room ' + aval(r.room_number), badge: abadge(String(aval(r.status, 'unavailable')).toLowerCase()), meta: aval(r.hostel_name) + ' \u00B7 Block ' + aval(r.building_code), meta2: 'Floor ' + aval(r.floor_number) + ' \u00B7 ' + aval(r.available_beds, 0) + ' of ' + aval(r.max_occupants) + ' beds free' };
     }, { attrs: function (r) { return 'role="button" tabindex="0" data-id="' + r.room_id + '"'; }, active: function (r) { return Number(r.room_id) === selected; } });
   }
   pager.innerHTML = pagerHtml(page, pages, shown.length, rows.length, 'rooms');
@@ -72,8 +73,8 @@ function render() {
     return !q || (String(aval(b.bed_id)) + ' ' + String(aval(b.room_id)) + ' ' + String(aval(b.bed_number))).toLowerCase().indexOf(q) > -1;
   });
   if (!bedRows.length) aState(bedsList, 'empty', 'No beds match your search.');
-  else bedsList.innerHTML = tableHtml(BED_COLS, '1fr 1fr 1fr', bedRows, function (b) {
-    return { name: 'Bed ' + aval(b.bed_number), badge: abadge(String(aval(b.status, 'available')).toLowerCase()), meta: 'bed_id: ' + aval(b.bed_id), meta2: 'room_id: ' + aval(b.room_id) };
+  else bedsList.innerHTML = tableHtml(BED_COLS, '1.6fr 1.6fr 1fr 1fr', bedRows, function (b) {
+    return { name: 'Bed ' + aval(b.bed_number), badge: abadge(String(aval(b.status, 'available')).toLowerCase()), meta: aval(b.hostel_name) + ' \u00B7 Room ' + aval(b.room_number), meta2: '' };
   });
 }
 function bedLabel(b) {
@@ -95,8 +96,7 @@ async function openRoom(id) {
   if (!res.success) return aState(box, 'error', res.message || 'Could not load beds.', function () { openRoom(id); });
   box.innerHTML = '<div class="a-panel">' + res.beds.map(function (b) {
     return '<div class="a-bedrow is-' + esc((b.current_status || 'Available').toLowerCase()) + '">' + aicon('bed') + '<span>' + esc(bedLabel(b)) + '</span></div>';
-  }).join('') + '<button class="a-btn a-btn-soft a-btn-block" id="edit">Edit Room</button></div>';
-  document.getElementById('edit').onclick = pendingFeature('Edit room');
+  }).join('') + '</div>';
 }
 list.addEventListener('click', function (e) { var r = e.target.closest('[data-id]'); if (r) openRoom(+r.dataset.id); });
 list.addEventListener('keydown', function (e) { var r = e.target.closest('[data-id]'); if (r && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openRoom(+r.dataset.id); } });
@@ -105,12 +105,40 @@ bindSearch(function (v) { q = v; render(); });
 document.getElementById('f-hostel').onchange = function (e) { fh = e.target.value; render(); };
 document.getElementById('f-block').onchange = function (e) { fb = e.target.value; render(); };
 document.getElementById('f-avail').onchange = function (e) { fa = e.target.value; render(); };
+document.getElementById('add-room').onclick = function () {
+  if (!hostelList.length) { aToast('Add a hostel first, then add rooms to it.'); return; }
+  aForm({
+    title: 'Add room',
+    intro: 'One bed is created for every occupant the room holds.',
+    submitLabel: 'Add room',
+    fields: [
+      { name: 'hostel_id', label: 'Hostel', type: 'select', required: true, options: hostelList.map(function (h) { return { value: h.hostel_id, label: h.hostel_name + ' (' + h.hostel_type + ')' }; }) },
+      { name: 'building_code', label: 'Block / building code', required: true, placeholder: 'e.g. A', hint: '1-10 letters or numbers.' },
+      { name: 'floor_number', label: 'Floor', type: 'number', required: true, min: 0, value: 0, hint: '0 means the ground floor.' },
+      { name: 'room_number', label: 'Room number', required: true, placeholder: 'e.g. 101' },
+      { name: 'max_occupants', label: 'Beds in the room', type: 'number', required: true, min: 1, value: 4 },
+      { name: 'price_per_occupant', label: 'Price per bed (NGN)', type: 'number', required: true, min: 1, step: '0.01', placeholder: 'e.g. 45000' }
+    ],
+    onSubmit: function (form) {
+      var body = {
+        hostel_id: Number(form.hostel_id.value),
+        building_code: form.building_code.value.trim(),
+        floor_number: Number(form.floor_number.value),
+        room_number: form.room_number.value.trim(),
+        max_occupants: Number(form.max_occupants.value),
+        price_per_occupant: String(form.price_per_occupant.value).trim()
+      };
+      return fetchJson(ADMIN.API_BASE.replace(/\/+$/, '') + '/api/admin/rooms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    },
+    onDone: load
+  });
+};
 async function load() {
   aState(list, 'loading', 'Loading rooms...'); aState(bedsList, 'loading', 'Loading beds...'); pager.innerHTML = '';
   panel.innerHTML = '<p class="a-muted">Select a room to see its beds.</p>';
   var res = await adminApi.rooms();
   if (!res.success) return aState(list, 'error', res.message || 'Could not load rooms.', load);
-  all = res.rooms || []; allBeds = res.beds || [];
+  all = res.rooms || []; allBeds = res.beds || []; hostelList = res.hostels || [];
   fill('f-hostel', all.map(function (r) { return r.hostel_name; }).filter(function (v, i, a) { return a.indexOf(v) === i; }));
   fill('f-block', all.map(function (r) { return r.building_code; }).filter(function (v, i, a) { return a.indexOf(v) === i; }).sort());
   render(); if (all.length) openRoom(Number(all[0].room_id));

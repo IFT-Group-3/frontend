@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <title>Hostel details | ROOMMATE</title>
+    <script>
+        (function () {
+            try {
+                var savedTheme = localStorage.getItem('theme-preference');
+                var preferredTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-appearance', preferredTheme);
+            } catch (error) {}
+        }());
+    </script>
+    <link rel="stylesheet" href="../../css/global.css" />
+    <link rel="stylesheet" href="../../css/components.css" />
+    <link rel="stylesheet" href="../../css/student.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<body class="dashboard-layout">
+    <div id="sidebar-placeholder"></div>
+
+    <div class="main-content">
+        <div id="navbar-placeholder"></div>
+
+        <main class="content-padding">
+            <header class="page-header">
+                <div>
+                    <p class="text-sm text-muted-foreground tracking-wide">HOSTEL</p>
+                    <h1>Hostel details</h1>
+                </div>
+                <a href="hostels.html" class="btn btn-secondary">Back to hostels</a>
+            </header>
+
+            <section id="hostel-info" class="card mb-8" aria-live="polite">
+                <p class="text-muted-foreground">Loading...</p>
+            </section>
+
+            <h2 class="mb-6">Rooms with free beds</h2>
+            <section id="room-list" class="dashboard-grid" aria-live="polite"></section>
+        </main>
+        <div id="footer-placeholder"></div>
+    </div>
+
+    <div id="modal-placeholder"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../../js/app.js"></script>
+    <script src="../../js/api.js"></script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/student.js"></script>
+    <script>
+        Student.init();
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const info = document.getElementById('hostel-info');
+            const roomList = document.getElementById('room-list');
+            const hostelId = Number(Student.param('id'));
+
+            if (!hostelId) {
+                Student.showMessage(info, 'No hostel chosen', 'Pick a hostel from the list first.', 'hostels.html', 'See hostels');
+                return;
+            }
+
+            const [hostelResult, roomResult] = await Promise.all([
+                Student.call('/api/hostels'),
+                Student.call('/api/rooms/availability')
+            ]);
+
+            if (!hostelResult.ok) {
+                Student.showMessage(info, 'Could not load this hostel', hostelResult.data.message || 'Please try again.', 'hostels.html', 'Back to hostels');
+                return;
+            }
+
+            const hostel = (hostelResult.data.hostels || []).find(h => Number(h.hostel_id) === hostelId);
+            if (!hostel) {
+                Student.showMessage(info, 'Hostel not found', 'This hostel is not available to you.', 'hostels.html', 'Back to hostels');
+                return;
+            }
+
+            document.title = hostel.hostel_name + ' | ROOMMATE';
+            document.querySelector('.page-header h1').textContent = hostel.hostel_name;
+
+            info.replaceChildren();
+            const top = Student.el('div', 'flex justify-between items-start mb-6');
+            top.appendChild(Student.el('h3', '', hostel.hostel_name));
+            top.appendChild(Student.el('span', 'badge badge-secondary', hostel.hostel_type));
+            info.appendChild(top);
+            if (hostel.location) info.appendChild(Student.el('p', 'text-sm text-muted-foreground', hostel.location));
+            if (hostel.description) info.appendChild(Student.el('p', '', hostel.description));
+            info.appendChild(Student.el('p', 'text-sm', hostel.total_rooms + ' rooms in total'));
+
+            if (!roomResult.ok) {
+                Student.showMessage(roomList, 'Could not load rooms', roomResult.data.message || 'Please try again.');
+                return;
+            }
+
+            const rooms = (roomResult.data.rooms || []).filter(room => Number(room.hostel_id) === hostelId);
+            if (!rooms.length) {
+                Student.showMessage(roomList, 'No free rooms', 'Every room in this hostel is full for the current period.');
+                return;
+            }
+
+            rooms.forEach(room => {
+                const card = Student.el('article', 'card');
+                const where = [room.building_code ? 'Block ' + room.building_code : '', 'Floor ' + room.floor_number].filter(Boolean).join(' \u00B7 ');
+                card.appendChild(Student.el('h3', '', 'Room ' + room.room_number));
+                card.appendChild(Student.el('p', 'text-sm text-muted-foreground', where));
+                card.appendChild(Student.el('p', '', room.available_spaces + ' of ' + room.total_beds + ' beds free'));
+                card.appendChild(Student.el('p', 'font-semibold', Student.money(room.price_per_occupant) + ' per person'));
+                roomList.appendChild(card);
+            });
+
+            const choose = Student.el('a', 'btn btn-primary mt-4', 'Choose a room');
+            choose.href = 'room-selection.html?hostel=' + encodeURIComponent(hostelId);
+            roomList.after(choose);
+        });
+    </script>
+</body>
+</html>

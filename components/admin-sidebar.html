@@ -29,7 +29,7 @@
             <span>Payments</span>
         </a>
         <div class="nav-separator"></div>
-        <a href="{{prefix}}pages/auth/admin-login.html" class="nav-item text-destructive">
+        <a href="{{prefix}}pages/auth/admin-login.html" class="nav-item text-destructive" onclick="if (window.Auth) { event.preventDefault(); var go = this.href; Auth.logout().then(function () { sessionStorage.removeItem('hostel_admin'); window.location.assign(go); }); }">
             <i data-lucide="log-out"></i>
             <span>Sign out</span>
         </a>
