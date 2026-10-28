@@ -18,11 +18,32 @@
 </main>
 <script src="../../js/admin.js"></script>
 <script>
-const { ADMIN, esc, aval, naira, wait, failure, fetchJson, adminApi, adminSession, aicon, abadge, aState, aToast, mountAdminShell, bindSearch, pendingFeature, tableHtml, pagerHtml, kpiHtml, summaryHtml, fillSelect, downloadCsv } = AdminKit;
+const { aForm, ADMIN, esc, aval, naira, wait, failure, fetchJson, adminApi, adminSession, aicon, abadge, aState, aToast, mountAdminShell, bindSearch, pendingFeature, tableHtml, pagerHtml, kpiHtml, summaryHtml, fillSelect, downloadCsv } = AdminKit;
 mountAdminShell({ active: 'hostels', title: 'Hostels', subtitle: 'Manage hostel inventory, capacity and status.', searchPlaceholder: 'Search hostels' });
 document.getElementById('find-icon').innerHTML = aicon('search');
 document.getElementById('add').innerHTML = '+ Add Hostel';
-document.getElementById('add').onclick = pendingFeature('Add hostel');
+document.getElementById('add').onclick = function () {
+  aForm({
+    title: 'Add hostel',
+    intro: 'Students will see this hostel as soon as it is saved as Available.',
+    submitLabel: 'Add hostel',
+    fields: [
+      { name: 'hostel_name', label: 'Hostel name', required: true, placeholder: 'e.g. Mellanby Hall' },
+      { name: 'hostel_type', label: 'Who can stay here', type: 'select', required: true, options: [{ value: 'Male', label: 'Male' }, { value: 'Female', label: 'Female' }, { value: 'Mixed', label: 'Mixed' }] },
+      { name: 'location', label: 'Location', required: true, placeholder: 'e.g. Near the main gate' },
+      { name: 'description', label: 'Description', type: 'textarea' },
+      { name: 'status', label: 'Status', type: 'select', options: [{ value: 'Available', label: 'Available' }, { value: 'Unavailable', label: 'Unavailable' }] },
+      { name: 'image', label: 'Photo (optional)', type: 'file', accept: 'image/jpeg,image/png,image/webp', hint: 'JPEG, PNG or WebP, up to 5 MB.' }
+    ],
+    onSubmit: function (form) {
+      var data = new FormData(form);
+      data.set('total_rooms', '0');   /* the server keeps this number up to date as rooms are added */
+      if (!form.image.files.length) data.delete('image');
+      return fetchJson(ADMIN.API_BASE.replace(/\/+$/, '') + '/api/admin/hostels', { method: 'POST', body: data });
+    },
+    onDone: load
+  });
+};
 var list = document.getElementById('list'), pager = document.getElementById('pager');
 var all = [], q = '', type = '', status = '', page = 1, PER = 6;
 
@@ -32,26 +53,25 @@ function view() {
   });
 }
 var COLS = [
-  { label: 'hostel_id', cell: function (h) { return esc(aval(h.hostel_id)); } },
-  { label: 'hostel_name', cell: function (h) { return esc(aval(h.hostel_name)); } },
-  { label: 'hostel_type', cell: function (h) { return esc(aval(h.hostel_type)); } },
-  { label: 'location', cell: function (h) { return esc(aval(h.location)); } },
-  { label: 'description', cell: function (h) { return esc(aval(h.description)); } },
-  { label: 'total_rooms', cell: function (h) { return esc(aval(h.total_rooms)); } },
-  { label: 'status', cell: function (h) { return esc(aval(h.status)); } },
-  { label: 'image_path', cell: function (h) { return esc(aval(h.image_path)); } }
+  { label: 'Hostel', cell: function (h) { return '<strong>' + esc(aval(h.hostel_name)) + '</strong>'; } },
+  { label: 'Type', cell: function (h) { return esc(aval(h.hostel_type)); } },
+  { label: 'Location', cell: function (h) { return esc(aval(h.location)); } },
+  { label: 'Description', cell: function (h) { return esc(aval(h.description)); } },
+  { label: 'Rooms', cell: function (h) { return esc(aval(h.total_rooms, 0)); } },
+  { label: 'Status', cell: function (h) { return abadge(String(aval(h.status, 'unavailable')).toLowerCase()); } },
+  { label: 'Photo', cell: function (h) { return h.image_path ? '<a href="' + esc(ADMIN.API_BASE.replace(/\/+$/, '') + '/' + h.image_path) + '" target="_blank" rel="noopener">View</a>' : '\u2014'; } }
 ];
 function render() {
   var rows = view(), pages = Math.max(1, Math.ceil(rows.length / PER));
   if (page > pages) page = pages;
   var shown = rows.slice((page - 1) * PER, page * PER);
   if (!shown.length) { aState(list, 'empty', 'No hostels match your filters.'); pager.innerHTML = ''; return; }
-  list.innerHTML = tableHtml(COLS, '1fr 1.4fr 1fr 1.4fr 2fr .9fr 1fr 1.6fr', shown, function (h) {
+  list.innerHTML = tableHtml(COLS, '1.4fr .8fr 1.3fr 2fr .7fr 1fr .8fr', shown, function (h) {
     return {
       name: aval(h.hostel_name),
       badge: abadge(String(aval(h.status, 'unavailable')).toLowerCase()),
-      meta: 'hostel_id: ' + aval(h.hostel_id) + ' \u00B7 ' + aval(h.hostel_type) + ' \u00B7 ' + aval(h.location),
-      meta2: 'total_rooms: ' + aval(h.total_rooms)
+      meta: aval(h.hostel_type) + ' \u00B7 ' + aval(h.location),
+      meta2: aval(h.total_rooms, 0) + ' rooms'
     };
   });
   var btns = '<button class="a-btn a-btn-ghost" data-p="' + (page - 1) + '"' + (page === 1 ? ' disabled' : '') + '>Previous</button>';

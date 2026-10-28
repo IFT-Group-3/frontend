@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <title>Confirm allocation | ROOMMATE</title>
+    <script>
+        (function () {
+            try {
+                var savedTheme = localStorage.getItem('theme-preference');
+                var preferredTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-appearance', preferredTheme);
+            } catch (error) {}
+        }());
+    </script>
+    <link rel="stylesheet" href="../../css/global.css" />
+    <link rel="stylesheet" href="../../css/components.css" />
+    <link rel="stylesheet" href="../../css/student.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<body class="dashboard-layout">
+    <div id="sidebar-placeholder"></div>
+
+    <div class="main-content">
+        <div id="navbar-placeholder"></div>
+
+        <main class="content-padding">
+            <header class="page-header">
+                <div>
+                    <p class="text-sm text-muted-foreground tracking-wide">STEP 3 OF 3</p>
+                    <h1>Confirm and pay.</h1>
+                </div>
+                
+            </header>
+
+            <section id="confirm-card" class="card" aria-live="polite">
+                <p class="text-muted-foreground">Loading...</p>
+            </section>
+        </main>
+        <div id="footer-placeholder"></div>
+    </div>
+
+    <div id="modal-placeholder"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../../js/app.js"></script>
+    <script src="../../js/api.js"></script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/student.js"></script>
+    <script>
+        Student.init();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const card = document.getElementById('confirm-card');
+            const heading = document.querySelector('.page-header h1');
+            let allocation = Student.loadJson(Student.ALLOCATION_KEY);
+            // Paystack sends the student back with ?reference=... after paying
+            const returnedReference = Student.param('reference') || Student.param('trxref') || sessionStorage.getItem(Student.REFERENCE_KEY);
+            let timer = null;
+
+            function row(label, value) {
+                const line = Student.el('div', 'status-item');
+                line.appendChild(Student.el('span', 'label', label));
+                line.appendChild(Student.el('span', 'value', value));
+                return line;
+            }
+
+            async function verify(reference, button) {
+                if (button) { setBtnLoading(button, true); button.disabled = true; }
+                const result = await Student.call('/api/payments/verify', { reference: reference });
+                if (button) { setBtnLoading(button, false); button.disabled = false; }
+
+                if (!result.ok) {
+                    showToast(result.data.message || 'Payment is not confirmed yet.', 'error');
+                    return false;
+                }
+                showConfirmed(result.data);
+                return true;
+            }
+
+            function showConfirmed(data) {
+                clearInterval(timer);
+                Student.removeKey(Student.ALLOCATION_KEY);
+                Student.removeKey(Student.REFERENCE_KEY);
+                heading.textContent = 'You are all set.';
+                card.replaceChildren();
+                card.appendChild(Student.el('h3', '', 'Payment confirmed'));
+                card.appendChild(Student.el('p', '', 'Your bed is now yours for the whole period.'));
+                const list = Student.el('div', 'status-list mt-4');
+                list.appendChild(row('Bed', data.bed_number || ''));
+                list.appendChild(row('From', Student.formatDate(data.start_date)));
+                list.appendChild(row('Until', Student.formatDate(data.end_date)));
+                list.appendChild(row('Status', data.status || 'Confirmed'));
+                card.appendChild(list);
+                const home = Student.el('a', 'btn btn-primary mt-4', 'Back to dashboard');
+                home.href = 'dashboard.html';
+                card.appendChild(home);
+            }
+
+            function showReservation() {
+                card.replaceChildren();
+                const top = Student.el('div', 'flex justify-between items-start mb-6');
+                top.appendChild(Student.el('h3', '', 'Your reservation'));
+                top.appendChild(Student.el('span', 'badge badge-secondary', 'PENDING PAYMENT'));
+                card.appendChild(top);
+
+                const list = Student.el('div', 'status-list mb-6');
+                if (allocation.hostel_name) list.appendChild(row('Hostel', allocation.hostel_name));
+                if (allocation.room_number) list.appendChild(row('Room', allocation.room_number));
+                list.appendChild(row('Bed', allocation.bed_number || ''));
+                list.appendChild(row('From', Student.formatDate(allocation.start_date)));
+                list.appendChild(row('Until', Student.formatDate(allocation.end_date)));
+                list.appendChild(row('Amount', Student.money(allocation.amount)));
+                card.appendChild(list);
+
+                const countdown = Student.el('p', 'text-sm text-muted-foreground mb-6');
+                card.appendChild(countdown);
+
+                const actions = Student.el('div', 'flex gap-2');
+                const pay = Student.el('button', 'btn btn-primary', 'Pay with Paystack');
+                pay.type = 'button';
+                const check = Student.el('button', 'btn btn-secondary', 'I have paid');
+                check.type = 'button';
+                actions.appendChild(pay);
+                actions.appendChild(check);
+                card.appendChild(actions);
+
+                const expiresAt = allocation.expires_at_ms || ((allocation.reserved_at || Date.now()) + (allocation.expires_in_minutes || 30) * 60000);
+                function tick() {
+                    const left = expiresAt - Date.now();
+                    if (left <= 0) {
+                        clearInterval(timer);
+                        Student.removeKey(Student.ALLOCATION_KEY);
+                        Student.showMessage(card, 'Reservation expired', 'The 30 minutes are over, so the bed was released. Please choose a room again.', 'room-selection.html', 'Choose a room');
+                        return;
+                    }
+                    const minutes = Math.floor(left / 60000);
+                    const seconds = String(Math.floor((left % 60000) / 1000)).padStart(2, '0');
+                    countdown.textContent = 'Time left to pay: ' + minutes + ':' + seconds;
+                }
+                tick();
+                timer = setInterval(tick, 1000);
+
+                pay.addEventListener('click', async () => {
+                    setBtnLoading(pay, true);
+                    pay.disabled = true;
+                    const result = await Student.call('/api/payments/process', { allocation_id: allocation.allocation_id });
+                    if (!result.ok) {
+                        setBtnLoading(pay, false);
+                        pay.disabled = false;
+                        // A checkout may already exist - keep its reference so "I have paid" works
+                        if (result.data.reference) sessionStorage.setItem(Student.REFERENCE_KEY, result.data.reference);
+                        showToast(result.data.message || 'Could not start payment.', 'error');
+                        return;
+                    }
+                    sessionStorage.setItem(Student.REFERENCE_KEY, result.data.payment.reference);
+                    window.location.assign(result.data.payment.authorization_url);
+                });
+
+                check.addEventListener('click', () => {
+                    const reference = sessionStorage.getItem(Student.REFERENCE_KEY);
+                    if (!reference) {
+                        showToast('Start the payment first.', 'error');
+                        return;
+                    }
+                    verify(reference, check);
+                });
+            }
+
+            (async () => {
+                if (returnedReference) {
+                    card.replaceChildren(Student.el('p', 'text-muted-foreground', 'Checking your payment...'));
+                    if (await verify(returnedReference)) return;
+                }
+                // The server knows what this student really holds, even after a refresh or a new tab.
+                const mine = await Student.call('/api/allocations/mine');
+                if (mine.ok) {
+                    const current = mine.data.allocation;
+                    if (!current) {
+                        Student.removeKey(Student.ALLOCATION_KEY);
+                        allocation = null;
+                    } else if (current.status === 'Confirmed') {
+                        showConfirmed(current);
+                        return;
+                    } else {
+                        allocation = Object.assign({}, current, { expires_at_ms: Date.now() + current.seconds_left * 1000 });
+                        Student.saveJson(Student.ALLOCATION_KEY, allocation);
+                        if (mine.data.payment && mine.data.payment.status === 'Pending') {
+                            sessionStorage.setItem(Student.REFERENCE_KEY, mine.data.payment.reference);
+                        }
+                    }
+                }
+                if (allocation) {
+                    showReservation();
+                } else {
+                    Student.showMessage(card, 'Nothing to confirm', 'You have no room reserved at the moment.', 'room-selection.html', 'Choose a room');
+                }
+            })();
+        });
+    </script>
+</body>
+</html>

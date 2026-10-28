@@ -16,7 +16,7 @@
             <span>Room Selection</span>
         </a>
         <div class="nav-separator"></div>
-        <a href="{{prefix}}pages/auth/login.html" class="nav-item text-destructive">
+        <a href="{{prefix}}pages/auth/login.html" class="nav-item text-destructive" onclick="if (window.Auth) { event.preventDefault(); var go = this.href; Auth.logout().then(function () { window.location.assign(go); }); }">
             <i data-lucide="log-out"></i>
             <span>Logout</span>
         </a>

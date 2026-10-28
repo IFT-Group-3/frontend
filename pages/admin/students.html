@@ -64,10 +64,8 @@ function showPanel(id) {
   var pay = p ? abadge(p.status.toLowerCase()) : 'No invoice';
   panel.innerHTML = '<div class="a-who"><div class="a-avatar"></div><div><h2></h2><p class="a-caption"></p></div></div>' +
     '<div><div class="a-kv"><span>Department</span><span>' + esc(s.department) + '</span></div><div class="a-kv"><span>Level</span><span>' + esc(s.level) + '</span></div><div class="a-kv"><span>Email</span><span>' + esc(s.email) + '</span></div></div>' +
-    '<h3>Current allocation</h3><div><div class="a-kv"><span>Hostel</span><span>' + (a ? esc(a.hostel_name) : 'Not allocated') + '</span></div><div class="a-kv"><span>Room / Bed</span><span>' + (a ? esc(a.room_number + ' / ' + a.bed_number) : '\u2014') + '</span></div><div class="a-kv"><span>Payment</span><span>' + pay + '</span></div></div>' +
-    '<button class="a-btn a-btn-soft a-btn-block" id="profile">View full profile</button>';
+    '<h3>Current allocation</h3><div><div class="a-kv"><span>Hostel</span><span>' + (a ? esc(a.hostel_name) : 'Not allocated') + '</span></div><div class="a-kv"><span>Room / Bed</span><span>' + (a ? esc(a.room_number + ' / ' + a.bed_number) : '\u2014') + '</span></div><div class="a-kv"><span>Payment</span><span>' + pay + '</span></div></div>';
   panel.querySelector('h2').textContent = aval(s.first_name) + ' ' + aval(s.last_name); panel.querySelector('.a-caption').textContent = aval(s.matric_number);
-  document.getElementById('profile').onclick = pendingFeature('Full profile');
   if (matchMedia('(max-width:1200px)').matches && id !== Number(all[0].student_id)) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 list.addEventListener('click', function (e) { var r = e.target.closest('[data-id]'); if (r) showPanel(+r.dataset.id); });
