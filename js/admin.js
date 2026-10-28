@@ -4,8 +4,16 @@
    Set USE_MOCK to false when the PHP admin endpoints exist. Force failures in mock mode with ?mock=NETWORK. */
 const ADMIN = {
   USE_MOCK: false,
-  API_BASE: (['localhost', '127.0.0.1'].includes(location.hostname) ? 'http://localhost/backend' : location.origin) + '/api/',
+  API_BASE: (['localhost', '127.0.0.1'].includes(location.hostname) 
+    ? (location.pathname.includes('/ift-project/') ? 'http://localhost/ift-project/backend' : 'http://localhost/backend') 
+    : location.origin),
   TIMEOUT_MS: 8000
+};
+/* Join the backend root with an endpoint path, never producing a doubled slash. */
+const apiUrl = (path, params = {}) => {
+  const cleanPath = String(path || '').replace(/^\/+/, '');
+  const qs = new URLSearchParams(params).toString();
+  return ADMIN.API_BASE.replace(/\/+$/, '') + '/' + cleanPath + (qs ? '?' + qs : '');
 };
 const MOCK_URL = new URL('mock/admin/', document.currentScript.src).href;
 
@@ -21,8 +29,19 @@ async function fetchJson(url, options) {
   const timer = setTimeout(() => ctrl.abort(), ADMIN.TIMEOUT_MS);
   try {
     const res = await fetch(url, { ...options, credentials: 'include', signal: ctrl.signal });
-    if (!res.ok) return failure('NETWORK', 'Could not reach the server. Try again.');
-    return await res.json();
+    let data;
+    try {
+      data = await res.json();
+    } catch (e) {
+      if (!res.ok) return failure('NETWORK', 'Could not reach the server. Try again.');
+      throw e;
+    }
+    if (!res.ok) {
+      return data && typeof data === 'object' 
+        ? { success: false, message: data.message || 'Could not reach the server. Try again.', code: res.status }
+        : failure('NETWORK', 'Could not reach the server. Try again.');
+    }
+    return data;
   } catch (e) {
     return failure('NETWORK', 'Could not reach the server. Try again.');
   } finally { clearTimeout(timer); }
@@ -35,24 +54,23 @@ const adminApi = {
       if (new URLSearchParams(location.search).get('mock') === 'NETWORK') return failure('NETWORK', 'Could not reach the server. Try again.');
       return fetchJson(MOCK_URL + mockFile);
     }
-    const qs = new URLSearchParams(params).toString();
-    return fetchJson(ADMIN.API_BASE + endpoint + (qs ? '?' + qs : ''));
+    return fetchJson(apiUrl(endpoint, params));
   },
   async login(email, password) {
     if (ADMIN.USE_MOCK) {
       await wait(700);
       return { success: true, admin: { name: 'Dr. Tunde Adebayo', role: 'Hostel Administrator', email } };
     }
-    return fetchJson(ADMIN.API_BASE + 'auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+    return fetchJson(apiUrl('/api/auth/login'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
   },
-  dashboard: () => adminApi.get('admin/dashboard', 'dashboard.json'),
+  dashboard: () => adminApi.get('/api/admin/dashboard', 'dashboard.json'),
   students: async () => adminApi.getCollection('students'),
   allocations: async () => adminApi.getCollection('allocations'),
   payments: async () => adminApi.getCollection('payments'),
   hostels: async () => adminApi.getCollection('hostels'),
   rooms: async () => adminApi.getCollection('rooms'),
   async getCollection(collection) {
-    const dashboard = await adminApi.get('admin/dashboard', 'dashboard.json');
+    const dashboard = await adminApi.get('/api/admin/dashboard', 'dashboard.json');
     if (!dashboard.success) return dashboard;
     return {
       ...dashboard,
@@ -62,7 +80,7 @@ const adminApi = {
   },
   async roomBeds(roomId) {
     if (!ADMIN.USE_MOCK) {
-      const dashboard = await adminApi.get('admin/dashboard', 'dashboard.json');
+      const dashboard = await adminApi.get('/api/admin/dashboard', 'dashboard.json');
       if (!dashboard.success) return dashboard;
       return {
         success: true,

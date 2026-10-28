@@ -23,7 +23,9 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.`;
-const API_BASE_URL = (['localhost', '127.0.0.1'].includes(location.hostname) ? 'http://localhost/backend' : location.origin);
+const API_BASE_URL = (['localhost', '127.0.0.1'].includes(location.hostname) 
+    ? (location.pathname.includes('/ift-project/') ? 'http://localhost/ift-project/backend' : 'http://localhost/backend') 
+    : location.origin);
 
 const COMPONENT_FALLBACKS = {
     navbar: '<header class="main-header"><nav class="nav-container" aria-label="Main navigation"><a href="{{prefix}}index.html" class="main-logo">ROOMMATE</a><button class="nav-menu-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" onclick="toggleMobileNav()"><i data-lucide="menu" aria-hidden="true"></i></button><div class="nav-links" id="main-navigation"><a href="{{prefix}}index.html#features">Features</a><a href="{{prefix}}index.html#about">About</a><button class="btn-icon theme-toggle" type="button" onclick="toggleDarkMode()" aria-label="Switch to dark mode"><i data-lucide="sun" class="sun-icon"></i><i data-lucide="moon" class="moon-icon"></i></button><a href="{{prefix}}pages/auth/login.html" class="btn btn-secondary">Login</a></div></nav></header>',
@@ -149,13 +151,13 @@ async function signIn(email, password) {
     try {
         payload = await response.json();
     } catch (error) {
-        throw new Error('The authentication service returned an invalid response.');
+        console.error('The authentication service returned an invalid response.');
     }
 
-    if (!response.ok || payload.success === false) {
-        throw new Error(payload.message || 'Invalid email or password.');
+    if (!response.ok || (payload && payload.success === false)) {
+        throw new Error((payload && payload.message) || 'Invalid email or password.');
     }
-    if (!payload.user || !['student', 'admin'].includes(payload.user.role)) {
+    if (!payload || !payload.user || !['student', 'admin'].includes(payload.user.role)) {
         throw new Error('The authentication response did not include a valid account role.');
     }
     return payload.user;
