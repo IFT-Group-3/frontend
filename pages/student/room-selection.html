@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <title>Room selection | ROOMMATE</title>
+    <script>
+        (function () {
+            try {
+                var savedTheme = localStorage.getItem('theme-preference');
+                var preferredTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-appearance', preferredTheme);
+            } catch (error) {}
+        }());
+    </script>
+    <link rel="stylesheet" href="../../css/global.css" />
+    <link rel="stylesheet" href="../../css/components.css" />
+    <link rel="stylesheet" href="../../css/student.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<body class="dashboard-layout">
+    <div id="sidebar-placeholder"></div>
+
+    <div class="main-content">
+        <div id="navbar-placeholder"></div>
+
+        <main class="content-padding">
+            <header class="page-header">
+                <div>
+                    <p class="text-sm text-muted-foreground tracking-wide">STEP 2 OF 3</p>
+                    <h1>Pick your room.</h1>
+                </div>
+                <a href="hostels.html" class="btn btn-secondary">Browse hostels</a>
+            </header>
+
+            <div class="form-group mb-6" style="max-width:320px;">
+                <label class="label" for="hostel-filter">Show rooms in</label>
+                <select id="hostel-filter" class="select">
+                    <option value="">All hostels</option>
+                </select>
+            </div>
+
+            <p id="period-note" class="text-sm text-muted-foreground mb-6"></p>
+            <section id="room-list" class="dashboard-grid" aria-live="polite">
+                <p class="text-muted-foreground">Loading rooms...</p>
+            </section>
+        </main>
+        <div id="footer-placeholder"></div>
+    </div>
+
+    <div id="modal-placeholder"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../../js/app.js"></script>
+    <script src="../../js/api.js"></script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/student.js"></script>
+    <script>
+        Student.init();
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const list = document.getElementById('room-list');
+            const filter = document.getElementById('hostel-filter');
+            const note = document.getElementById('period-note');
+
+            const result = await Student.call('/api/rooms/availability');
+            if (!result.ok) {
+                Student.showMessage(list, 'Could not load rooms', result.data.message || 'Please try again.');
+                return;
+            }
+
+            const rooms = result.data.rooms || [];
+
+            // A student can hold only one bed. Tell them if they already do.
+            let holding = false;
+            const mine = await Student.call('/api/allocations/mine');
+            if (mine.ok && mine.data.allocation) {
+                holding = true;
+                const current = mine.data.allocation;
+                const banner = Student.el('div', 'card mb-6');
+                banner.appendChild(Student.el('h3', '', current.status === 'Confirmed' ? 'You already have a bed' : 'You are holding a bed'));
+                banner.appendChild(Student.el('p', '', current.hostel_name + ', room ' + current.room_number + ', bed ' + current.bed_number + '. ' +
+                    (current.status === 'Confirmed' ? 'Your payment is confirmed.' : 'Finish paying before the hold runs out.')));
+                const open = Student.el('a', 'btn btn-primary mt-4', current.status === 'Confirmed' ? 'View my bed' : 'Continue to payment');
+                open.href = 'allocation-confirmation.html';
+                banner.appendChild(open);
+                document.getElementById('period-note').before(banner);
+            }
+            const period = result.data.allocation_period;
+            if (period) note.textContent = 'Stay period: ' + Student.formatDate(period.start_date) + ' to ' + Student.formatDate(period.end_date);
+
+            // Fill the hostel dropdown from the rooms we have
+            const seen = new Map();
+            rooms.forEach(room => seen.set(room.hostel_id, room.hostel_name));
+            seen.forEach((name, id) => {
+                const option = Student.el('option', '', name);
+                option.value = id;
+                filter.appendChild(option);
+            });
+            const wanted = Student.param('hostel');
+            if (wanted && seen.has(Number(wanted))) filter.value = wanted;
+
+            async function reserve(room, button) {
+                const label = 'Room ' + room.room_number + ' in ' + room.hostel_name;
+                if (!window.confirm('Reserve ' + label + ' for ' + Student.money(room.price_per_occupant) + '? You will have 30 minutes to pay.')) return;
+
+                setBtnLoading(button, true);
+                button.disabled = true;
+                const reply = await Student.call('/api/allocations/create', { room_id: room.room_id });
+
+                if (!reply.ok) {
+                    setBtnLoading(button, false);
+                    button.disabled = false;
+                    showToast(reply.data.message || 'Could not reserve this room.', 'error');
+                    return;
+                }
+
+                Student.saveJson(Student.ALLOCATION_KEY, Object.assign({}, reply.data.allocation, {
+                    hostel_name: room.hostel_name,
+                    room_number: room.room_number,
+                    reserved_at: Date.now()
+                }));
+                window.location.assign('allocation-confirmation.html');
+            }
+
+            function render() {
+                const chosen = filter.value;
+                const shown = rooms.filter(room => !chosen || String(room.hostel_id) === chosen);
+                list.replaceChildren();
+
+                if (!shown.length) {
+                    Student.showMessage(list, 'No free rooms', 'There are no free rooms here right now.');
+                    return;
+                }
+
+                shown.forEach(room => {
+                    const card = Student.el('article', 'card');
+                    const top = Student.el('div', 'flex justify-between items-start mb-6');
+                    top.appendChild(Student.el('h3', '', 'Room ' + room.room_number));
+                    top.appendChild(Student.el('span', 'badge badge-secondary', room.available_spaces + ' free'));
+                    card.appendChild(top);
+
+                    card.appendChild(Student.el('p', 'text-sm text-muted-foreground', room.hostel_name));
+                    const where = [room.building_code ? 'Block ' + room.building_code : '', 'Floor ' + room.floor_number].filter(Boolean).join(' \u00B7 ');
+                    card.appendChild(Student.el('p', 'text-sm', where));
+                    card.appendChild(Student.el('p', 'font-semibold', Student.money(room.price_per_occupant) + ' per person'));
+
+                    const button = Student.el('button', 'btn btn-primary mt-4 w-full', 'Reserve this room');
+                    button.type = 'button';
+                    button.disabled = holding;
+                    button.addEventListener('click', () => reserve(room, button));
+                    card.appendChild(button);
+
+                    list.appendChild(card);
+                });
+            }
+
+            filter.addEventListener('change', render);
+            render();
+        });
+    </script>
+</body>
+</html>

@@ -184,3 +184,14 @@
   .a-row .m-name{grid-area:name;font-weight:700}.a-row .m-badge{grid-area:badge}
   .a-row .m-meta{grid-area:meta;font-size:12px;color:var(--a-text-2)}.a-row .m-meta2{grid-area:meta2;font-size:13px}
 }
+
+/* ---- Form dialog (Add hostel, Add room, allocation period) ---- */
+.a-modal-scrim{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.55)}
+.a-modal{width:100%;max-width:480px;max-height:92vh;overflow:auto;padding:24px;border-radius:var(--a-r-lg);background:var(--a-card);color:var(--a-text);border:1px solid var(--a-border);box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.a-modal h2{margin:0 0 4px}
+.a-modal form{display:grid;gap:14px;margin-top:16px}
+.a-field{display:grid;gap:6px;font-size:13px;font-weight:600}
+.a-field .a-input{width:100%;font-weight:400}
+.a-field small{font-weight:400;font-size:12px}
+.a-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}
+.a-form-error{margin:0;padding:10px 12px;border-radius:var(--a-r);background:var(--a-error-soft);color:var(--a-error);font-size:13px}

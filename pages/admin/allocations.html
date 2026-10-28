@@ -6,7 +6,8 @@
 <main id="content">
   <div class="a-toolbar"><div class="a-find"><span class="fi"></span><input class="a-input" type="search" placeholder="Search allocations" aria-label="Search allocations"></div>
     <select class="a-input" id="f-session" aria-label="Filter by session"><option value="">All sessions</option></select>
-    <select class="a-input" id="f-status" aria-label="Filter by status"><option value="">All statuses</option><option value="confirmed">Confirmed</option><option value="pending">Pending</option><option value="cancelled">Cancelled</option></select>
+    <select class="a-input" id="f-status" aria-label="Filter by status"><option value="">All statuses</option><option value="confirmed">Confirmed</option><option value="pending">Pending</option><option value="cancelled">Cancelled</option><option value="expired">Expired</option></select>
+    <button class="a-btn a-btn-primary" id="period">Set allocation period</button>
   </div>
   <div id="kpis"></div>
   <div class="a-card" style="padding:16px">
@@ -17,26 +18,25 @@
 </main>
 <script src="../../js/admin.js"></script>
 <script>
-const { ADMIN, esc, aval, naira, wait, failure, fetchJson, adminApi, adminSession, aicon, abadge, aState, aToast, mountAdminShell, bindSearch, pendingFeature, tableHtml, pagerHtml, kpiHtml, summaryHtml, fillSelect, downloadCsv } = AdminKit;
+const { aForm, ADMIN, esc, aval, naira, wait, failure, fetchJson, adminApi, adminSession, aicon, abadge, aState, aToast, mountAdminShell, bindSearch, pendingFeature, tableHtml, pagerHtml, kpiHtml, summaryHtml, fillSelect, downloadCsv } = AdminKit;
 mountAdminShell({ active: 'allocations', title: 'Allocations', subtitle: 'Monitor current and historical bed assignments.', searchPlaceholder: 'Search allocations' });
 document.querySelectorAll('.fi').forEach(function (e) { e.innerHTML = aicon('search'); });
 var list = document.getElementById('list'), pager = document.getElementById('pager');
-var all = [], q = '', sess = '', stat = '', page = 1, PER = 5;
+var period = null, all = [], q = '', sess = '', stat = '', page = 1, PER = 5;
 var COLS = [
-  { label: 'allocation_id', cell: function (a) { return esc(aval(a.allocation_id)); } },
-  { label: 'user_id', cell: function (a) { return esc(aval(a.user_id)); } },
-  { label: 'room_id', cell: function (a) { return esc(aval(a.room_id)); } },
-  { label: 'bed_id', cell: function (a) { return esc(aval(a.bed_id)); } },
-  { label: 'start_date', cell: function (a) { return esc(aval(a.start_date)); } },
-  { label: 'end_date', cell: function (a) { return esc(aval(a.end_date)); } },
-  { label: 'status', cell: function (a) { return esc(aval(a.status)); } },
-  { label: 'expires_at', cell: function (a) { return esc(aval(a.expires_at)); } },
-  { label: 'created_at', cell: function (a) { return esc(aval(a.created_at)); } },
-  { label: 'confirmed_at', cell: function (a) { return esc(aval(a.confirmed_at)); } }
+  { label: 'Student', cell: function (a) { return '<strong>' + esc(aval(a.first_name) + ' ' + aval(a.last_name)) + '</strong>'; } },
+  { label: 'Matric no.', cell: function (a) { return esc(aval(a.matric_number)); } },
+  { label: 'Hostel', cell: function (a) { return esc(aval(a.hostel_name)); } },
+  { label: 'Room', cell: function (a) { return esc(aval(a.building_code, '') + ' ' + aval(a.room_number)); } },
+  { label: 'Bed', cell: function (a) { return esc(aval(a.bed_number)); } },
+  { label: 'From', cell: function (a) { return esc(aval(a.start_date)); } },
+  { label: 'Until', cell: function (a) { return esc(aval(a.end_date)); } },
+  { label: 'Status', cell: function (a) { return abadge(String(aval(a.status, 'unallocated')).toLowerCase()); } },
+  { label: 'Pay before', cell: function (a) { return esc(aval(a.expires_at)); } }
 ];
 function view() {
   return all.filter(function (a) {
-    return (!q || (String(aval(a.allocation_id)) + ' ' + String(aval(a.user_id)) + ' ' + String(aval(a.room_id)) + ' ' + String(aval(a.bed_id)) + ' ' + String(aval(a.start_date)) + ' ' + String(aval(a.end_date)) + ' ' + String(aval(a.status)) + ' ' + String(aval(a.expires_at)) + ' ' + String(aval(a.created_at)) + ' ' + String(aval(a.confirmed_at))).toLowerCase().indexOf(q) > -1) && (!sess || (a.start_date + ' - ' + a.end_date) === sess) && (!stat || String(aval(a.status)).toLowerCase() === stat);
+    return (!q || (String(aval(a.allocation_id)) + ' ' + String(aval(a.first_name)) + ' ' + String(aval(a.last_name)) + ' ' + String(aval(a.matric_number)) + ' ' + String(aval(a.hostel_name)) + ' ' + String(aval(a.room_number)) + ' ' + String(aval(a.bed_number)) + ' ' + String(aval(a.start_date)) + ' ' + String(aval(a.end_date)) + ' ' + String(aval(a.status)) + ' ' + String(aval(a.expires_at)) + ' ' + String(aval(a.created_at)) + ' ' + String(aval(a.confirmed_at))).toLowerCase().indexOf(q) > -1) && (!sess || (a.start_date + ' - ' + a.end_date) === sess) && (!stat || String(aval(a.status)).toLowerCase() === stat);
   });
 }
 function render() {
@@ -44,8 +44,8 @@ function render() {
   if (page > pages) page = pages;
   var shown = rows.slice((page - 1) * PER, page * PER);
   if (!shown.length) { aState(list, 'empty', 'No allocations match your filters.'); pager.innerHTML = ''; return; }
-  list.innerHTML = tableHtml(COLS, '1fr 1fr 1fr 1fr 1.2fr 1.2fr 1fr 1.4fr 1.4fr 1.4fr', shown, function (a) {
-    return { name: 'Allocation ' + aval(a.allocation_id), badge: abadge(String(aval(a.status, 'unallocated')).toLowerCase()), meta: 'user_id: ' + aval(a.user_id) + ' \u00B7 room_id: ' + aval(a.room_id) + ' \u00B7 bed_id: ' + aval(a.bed_id), meta2: aval(a.start_date) + ' - ' + aval(a.end_date) };
+  list.innerHTML = tableHtml(COLS, '1.5fr 1fr 1.5fr .9fr 1.5fr 1fr 1fr 1fr 1.3fr', shown, function (a) {
+    return { name: aval(a.first_name) + ' ' + aval(a.last_name), badge: abadge(String(aval(a.status, 'unallocated')).toLowerCase()), meta: aval(a.hostel_name) + ' \u00B7 Room ' + aval(a.room_number) + ' \u00B7 ' + aval(a.bed_number), meta2: aval(a.start_date) + ' - ' + aval(a.end_date) };
   });
   pager.innerHTML = pagerHtml(page, pages, shown.length, rows.length, 'allocations');
 }
@@ -54,11 +54,27 @@ bindSearch(function (v) { q = v; page = 1; render(); });
 [['f-session', function (v) { sess = v; }], ['f-status', function (v) { stat = v; }]].forEach(function (f) {
   document.getElementById(f[0]).onchange = function (e) { f[1](e.target.value); page = 1; render(); };
 });
+function today() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+document.getElementById('period').onclick = function () {
+  aForm({
+    title: 'Allocation period',
+    intro: 'Students can only book beds for the dates set here. The start date cannot be in the past.',
+    submitLabel: 'Save period',
+    fields: [
+      { name: 'start_date', label: 'Start date', type: 'date', required: true, value: period && period.start_date >= today() ? period.start_date : today(), min: today() },
+      { name: 'end_date', label: 'End date', type: 'date', required: true, value: period ? period.end_date : '' }
+    ],
+    onSubmit: function (form) {
+      return fetchJson(ADMIN.API_BASE.replace(/\/+$/, '') + '/api/admin/allocation-period', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ start_date: form.start_date.value, end_date: form.end_date.value }) });
+    },
+    onDone: load
+  });
+};
 async function load() {
   aState(list, 'loading', 'Loading allocations...'); pager.innerHTML = '';
   var res = await adminApi.allocations();
   if (!res.success) return aState(list, 'error', res.message || 'Could not load allocations.', load);
-  all = res.allocations;
+  all = res.allocations; period = res.allocation_period || null;
   var counts = all.reduce(function (result, allocation) {
     var status = String(aval(allocation.status, 'unallocated')).toLowerCase();
     result[status] = (result[status] || 0) + 1;
@@ -69,7 +85,7 @@ async function load() {
     { label: 'Pending', value: counts.pending || 0 },
     { label: 'Cancelled', value: counts.cancelled || 0 },
     { label: 'Expired', value: counts.expired || 0 }
-  ]) + summaryHtml([(counts.confirmed || 0) + ' Confirmed \u00B7 ' + (counts.pending || 0) + ' Pending']);
+  ]) + summaryHtml([(counts.confirmed || 0) + ' Confirmed \u00B7 ' + (counts.pending || 0) + ' Pending', period ? 'Allocation period: ' + period.start_date + ' to ' + period.end_date : 'No allocation period set yet. Students cannot book rooms until you set one.']);
   fillSelect('f-session', all.map(function (a) { return aval(a.start_date) + ' - ' + aval(a.end_date); }));
   render();
 }

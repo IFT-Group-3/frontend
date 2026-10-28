@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <title>Hostels | ROOMMATE</title>
+    <script>
+        (function () {
+            try {
+                var savedTheme = localStorage.getItem('theme-preference');
+                var preferredTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-appearance', preferredTheme);
+            } catch (error) {}
+        }());
+    </script>
+    <link rel="stylesheet" href="../../css/global.css" />
+    <link rel="stylesheet" href="../../css/components.css" />
+    <link rel="stylesheet" href="../../css/student.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<body class="dashboard-layout">
+    <div id="sidebar-placeholder"></div>
+
+    <div class="main-content">
+        <div id="navbar-placeholder"></div>
+
+        <main class="content-padding">
+            <header class="page-header">
+                <div>
+                    <p class="text-sm text-muted-foreground tracking-wide">AVAILABLE TO YOU</p>
+                    <h1>Choose a hostel.</h1>
+                </div>
+                <a href="room-selection.html" class="btn btn-primary">Go to room selection</a>
+            </header>
+
+            <section id="hostel-list" class="dashboard-grid" aria-live="polite">
+                <p class="text-muted-foreground">Loading hostels...</p>
+            </section>
+        </main>
+        <div id="footer-placeholder"></div>
+    </div>
+
+    <div id="modal-placeholder"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../../js/app.js"></script>
+    <script src="../../js/api.js"></script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/student.js"></script>
+    <script>
+        Student.init();
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const list = document.getElementById('hostel-list');
+            const result = await Student.call('/api/hostels');
+
+            if (!result.ok) {
+                Student.showMessage(list, 'Could not load hostels', result.data.message || 'Please try again.');
+                return;
+            }
+
+            const hostels = result.data.hostels || [];
+            if (!hostels.length) {
+                Student.showMessage(list, 'No hostels available', 'There are no hostels open for you right now. Check back later.');
+                return;
+            }
+
+            list.replaceChildren();
+            hostels.forEach(hostel => {
+                const card = Student.el('article', 'card');
+
+                if (hostel.image_path) {
+                    const image = Student.el('img');
+                    image.src = Api.url(hostel.image_path);
+                    image.alt = hostel.hostel_name + ' photo';
+                    image.loading = 'lazy';
+                    image.style.cssText = 'width:100%;height:160px;object-fit:cover;border-radius:8px;margin-bottom:16px;';
+                    image.addEventListener('error', () => image.remove());
+                    card.appendChild(image);
+                }
+
+                const top = Student.el('div', 'flex justify-between items-start mb-6');
+                top.appendChild(Student.el('h3', '', hostel.hostel_name));
+                top.appendChild(Student.el('span', 'badge badge-secondary', hostel.hostel_type));
+                card.appendChild(top);
+
+                if (hostel.location) card.appendChild(Student.el('p', 'text-sm text-muted-foreground', hostel.location));
+                if (hostel.description) card.appendChild(Student.el('p', '', hostel.description));
+                card.appendChild(Student.el('p', 'text-sm', hostel.total_rooms + ' rooms'));
+
+                const link = Student.el('a', 'btn btn-primary mt-4', 'View details');
+                link.href = 'hostel-details.html?id=' + encodeURIComponent(hostel.hostel_id);
+                card.appendChild(link);
+
+                list.appendChild(card);
+            });
+        });
+    </script>
+</body>
+</html>
