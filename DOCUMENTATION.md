@@ -1,5 +1,9 @@
 # ROOMMATE Frontend Documentation
 
+This document describes the current frontend implementation. For first-time
+setup, API configuration, and the repository map, start with
+[`README.md`](./README.md).
+
 ## Contributor
 
 **Femi-Akinwande Benjamin**  
@@ -13,19 +17,19 @@ ROOMMATE is a university hostel allocation frontend for the University of Ibadan
 
 ### Sign in
 
-File: `Frontend/pages/auth/login.html`
+File: `pages/auth/login.html`
 
 1. The user enters an email and password.
 2. The form submits to the shared authentication endpoint; the page does not assign a role based on email domain.
 3. The password can be shown or hidden with the password toggle.
 4. Invalid university email addresses display an inline warning and red input styling.
 5. Valid submissions display a loading state on the **Sign in** button.
-6. The API response determines the destination: `student` goes to `Frontend/pages/student/dashboard.html`, while `admin` goes to `Frontend/pages/admin/dashboard.html`.
+6. The API response determines the destination: `student` goes to `pages/student/dashboard.html`, while `admin` goes to `pages/admin/dashboard.html`.
 7. The page includes links for forgotten passwords, admissions support, and License & Legal.
 
 ### Forgot password
 
-File: `Frontend/pages/auth/forgot-password.html`
+File: `pages/auth/forgot-password.html`
 
 1. The student enters a university email address.
 2. The same `@stu.ui.edu.ng` restriction is applied.
@@ -36,7 +40,7 @@ File: `Frontend/pages/auth/forgot-password.html`
 
 ### Reset password
 
-File: `Frontend/pages/auth/reset-password.html`
+File: `pages/auth/reset-password.html`
 
 1. The student enters a new password with a minimum length of eight characters.
 2. A strength indicator evaluates length, uppercase letters, numbers, and symbols.
@@ -51,7 +55,7 @@ Client-side validation improves the user experience but is not a security bounda
 
 ### Administrator sign in
 
-Files: `Frontend/pages/auth/admin-login.html`, `Frontend/pages/admin/dashboard.html`
+Files: `pages/auth/admin-login.html`, `pages/admin/dashboard.html`
 
 1. Administrators have a separate sign-in page for clear UI context, but it uses the same login endpoint as student sign-in.
 2. The page submits the entered email and password without assigning or inferring a role.
@@ -80,7 +84,7 @@ The frontend does not expose either endpoint as a public registration form. Admi
 
 ## Shared Components
 
-Shared component files are stored in `Frontend/components/`:
+Shared component files are stored in `components/`:
 
 | Component | File | Purpose |
 |---|---|---|
@@ -92,7 +96,7 @@ Shared component files are stored in `Frontend/components/`:
 | Loader | `loader.html` | Loading indicator markup |
 | Toast | `toast.html` | Toast notification markup |
 
-Components are loaded through `Frontend/js/app.js`:
+Components are loaded through `js/app.js`:
 
 ```js
 loadComponent('navbar', 'navbar-placeholder');
@@ -100,7 +104,7 @@ loadComponent('footer', 'footer-placeholder');
 loadComponent('modal', 'modal-placeholder');
 ```
 
-Pages nested under `Frontend/pages/` use the `../../` path prefix. Component links use the `{{prefix}}` placeholder, which is replaced at runtime with the correct relative path.
+Pages nested under `pages/` use the `../../` path prefix. Component links use the `{{prefix}}` placeholder, which is replaced at runtime with the correct relative path.
 
 When a component cannot be fetched, the application keeps server-rendered markup or uses a JavaScript fallback for the navbar and footer. This allows the main navigation and footer to remain usable during local `file://` previews or unavailable component requests.
 
@@ -148,11 +152,11 @@ When a component cannot be fetched, the application keeps server-rendered markup
 
 ## Relevant Files
 
-- `Frontend/js/app.js` — component loading, themes, validation helpers, modal, toast, and loading utilities.
-- `Frontend/css/global.css` — global reset, theme variables, typography, and base styles.
-- `Frontend/css/components.css` — navbar, footer, modal, form, card, and responsive component styles.
-- `Frontend/css/auth.css` — authentication layout and validation warning styles.
-- `Frontend/pages/auth/` — sign-in, forgot-password, and reset-password flows.
-- `Frontend/pages/student/dashboard.html` — student dashboard using shared navigation and footer.
-- `Frontend/pages/auth/admin-login.html` — separate administrator sign-in interface.
-- `Frontend/pages/admin/dashboard.html` — administration dashboard shell.
+- `js/app.js` — component loading, themes, validation helpers, modal, toast, and loading utilities.
+- `css/global.css` — global reset, theme variables, typography, and base styles.
+- `css/components.css` — navbar, footer, modal, form, card, and responsive component styles.
+- `css/auth.css` — authentication layout and validation warning styles.
+- `pages/auth/` — sign-in, forgot-password, and reset-password flows.
+- `pages/student/dashboard.html` — student dashboard using shared navigation and footer.
+- `pages/auth/admin-login.html` — separate administrator sign-in interface.
+- `pages/admin/dashboard.html` — administration dashboard shell.
